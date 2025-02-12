@@ -1,0 +1,49 @@
+.codeWrapper {
+  padding: 10px;
+
+  width: 50%;
+
+  .codeContainer {
+    position: relative;
+    margin-bottom: 20px;
+    background-color: #2d2d2d;
+
+    border-radius: 8px;
+
+    .codeHeader {
+      display: flex;
+      justify-content: end;
+      padding: 10px;
+      border-bottom: 1px solid #fff3;
+
+      button {
+        display: flex;
+        align-items: center;
+        column-gap: 4px;
+        padding: 6px;
+        background-color: transparent;
+        border: none;
+        border-radius: 8px;
+        color: #e8e0dc;
+        cursor: pointer;
+        font-size: large;
+        transition: all 0.2s;
+
+        &:hover {
+          background-color: rgba(173, 173, 173, 0.2);
+        }
+      }
+    }
+
+    .codeBlock {
+      padding: 20px;
+      overflow: auto;
+      font-size: 14px;
+      color: #f8f4f2;
+
+      code {
+        font-family: "Courier Prime", monospace;
+      }
+    }
+  }
+}
