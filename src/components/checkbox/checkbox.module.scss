@@ -1,0 +1,66 @@
+.checkbox {
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+
+  &::before {
+    content: "";
+
+    position: absolute;
+    top: 50%;
+    left: -8px;
+    z-index: -1;
+    transform: translateY(-50%) scale(0);
+
+    display: block;
+
+    width: 36px;
+    height: 36px;
+
+    background-color: rgba(94, 94, 94, 0.699);
+    border-radius: 100%;
+
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  button {
+    all: unset;
+  }
+
+  .CheckboxRoot {
+    background-color: whitesmoke;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    .CheckboxIndicator {
+      display: flex;
+      align-items: center;
+      color: darkred;
+      font-size: 14px;
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
+    }
+  }
+
+  .Label {
+    color: whitesmoke;
+    padding-left: 15px;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  &:hover {
+    &::before {
+      transform: translateY(-50%) scale(1);
+    }
+  }
+}

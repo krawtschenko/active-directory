@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Code } from "../components/layout/code/code";
-import { Primary } from "../components/layout/primary/primary";
+import { Form } from "../components/layout/form/form.tsx";
 import styles from "./app.module.scss";
 import { Animation } from "../components/animation/animation";
 
@@ -12,7 +12,7 @@ export const App = () => {
 
   return (
     <div className={styles.app}>
-      <Primary
+      <Form
         action={action}
         users={users}
         groups={groups}
