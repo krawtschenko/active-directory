@@ -5,4 +5,11 @@
   .radio {
     margin-top: 15px;
   }
+
+  .inputs {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+  }
 }

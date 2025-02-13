@@ -2,13 +2,16 @@
   width: 100%;
 
   .label {
-    color: blueviolet;
+    margin-left: 6px;
+    color: whitesmoke;
   }
 
   .inputWrapper {
     padding: 5px;
-    border: 1px solid goldenrod;
+    background-color: black;
+    border: 1px solid darkred;
     border-radius: 8px;
+    transition: all 0.2s;
 
     .input {
       background-color: unset;
@@ -16,7 +19,7 @@
       width: 100%;
       padding: 5px 0;
       font-size: 16px;
-      color: blueviolet;
+      color: whitesmoke;
 
       &:focus {
         outline: none;
@@ -25,6 +28,11 @@
 
     &:focus-within {
       border-color: lightseagreen;
+      background-color: #1b1b1b;
+    }
+
+    &:hover {
+      background-color: #1b1b1b;
     }
   }
 }

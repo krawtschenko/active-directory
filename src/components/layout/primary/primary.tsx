@@ -3,35 +3,46 @@ import { Input } from "../../input/input";
 import { Radio } from "../../radio/radio";
 
 type PrimaryProps = {
+  action: string;
   users: string;
   groups: string;
-  setUsers: (value: string) => void;
-  setGroups: (value: string) => void;
+  setAction: (action: string) => void;
+  setUsers: (users: string) => void;
+  setGroups: (groups: string) => void;
 };
 
 export const Primary = (props: PrimaryProps) => {
-  const { users, groups, setUsers, setGroups } = props;
+  const { action, users, groups, setAction, setUsers, setGroups } = props;
+
+  const options = [
+    { label: "Tworzenie grupy", value: "create" },
+    { label: "Dodanie do grupy", value: "add" },
+  ];
 
   return (
     <div className={styles.primary}>
       <Radio
         className={styles.radio}
-        options={[{ label: "123", value: "123" }]}
+        options={options}
+        defaultValue={action}
+        onValueChange={(value) => setAction(value)}
       />
 
-      <Input
-        value={users}
-        onChange={(value) => setUsers(value.currentTarget.value.trim())}
-        placeholder="Loginy"
-        label="Loginy użytkowników"
-      />
+      <div className={styles.inputs}>
+        <Input
+          value={users}
+          onChange={(value) => setUsers(value.currentTarget.value.trim())}
+          placeholder="Login"
+          label="Login użytkownika"
+        />
 
-      <Input
-        value={groups}
-        onChange={(value) => setGroups(value.currentTarget.value.trim())}
-        placeholder="Nazwy"
-        label="Nazwy grup"
-      />
+        <Input
+          value={groups}
+          onChange={(value) => setGroups(value.currentTarget.value.trim())}
+          placeholder="Nazwa"
+          label="Nazwa grupy"
+        />
+      </div>
     </div>
   );
 };

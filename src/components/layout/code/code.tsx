@@ -3,40 +3,119 @@ import styles from "./code.module.scss";
 import { IoCopyOutline } from "react-icons/io5";
 
 type CodeProps = {
+  action: string;
   users: string;
   groups: string;
 };
 
-export const Code = ({ users, groups }: CodeProps) => {
+export const Code = ({ action, users, groups }: CodeProps) => {
   const [copyButtonText, setCopyButtonText] = useState("Copy");
 
-  const usersArray = users
-    .split(/[\s,]+/) // Розділяє рядок за пробілами
-    .filter(Boolean) // Видаляє порожні елементи
-    .map((user) => `"${user}"`)
-    .join(", ");
+  const usersArray = users.split(/[\s,]+/).filter(Boolean);
+  const groupsArray = groups.split(/[\s,]+/).filter(Boolean);
 
-  const groupsArray = groups
-    .split(/[\s,]+/)
-    .filter(Boolean)
-    .map((group) => `"GS_Firmy_${group}"`)
-    .join(", ");
+  function createGroup() {}
 
-  const code = `$users = @(${usersArray})\n$groups = @(${groupsArray})\nforeach ($group in $groups) {\n  foreach ($user in $users) {\n    try {\n      Add-ADGroupMember -Identity $group -Members $user\n      Write-Host "User $user successfully added to the group: $group"\n    }\n    catch {\n      Write-Host "Error adding user $user to the group: $group. Details: $_"\n    }\n  }\n}`;
+  function addUserToGroup(users: string[], groups: string[]) {
+    if (users.length === 1 && groups.length === 1) {
+      return `$user = "${usersArray[0]}"\n$group = "GS_Firmy_${groupsArray[0]}"\n\nif (Get-ADGroup -Filter {Name -eq $group}) {
+    if (Get-ADUser -Identity $user) {
+        try {
+            Add-ADGroupMember -Identity $group -Members $user
+            Write-Host "User $user has been successfully added to the group: $group"
+        } catch {
+            Write-Host "Error adding user $user to the group: $group. Details: $_"
+        }
+    } else {
+        Write-Host "User $user not found in Active Directory."
+    }
+} else {
+    Write-Host "Group $group not found in Active Directory."
+}`;
+    } else if (users.length === 1) {
+      return `$user = "${usersArray[0]}"\n$groups = @(${groupsArray
+        .map((group) => `"GS_Firmy_${group}"`)
+        .join(", ")})\n\nif (Get-ADUser -Identity $UserName) {
+    foreach ($GroupName in $Groups) {
+        if (Get-ADGroup -Filter {Name -eq $GroupName}) {
+            try {
+                Add-ADGroupMember -Identity $GroupName -Members $UserName
+                Write-Host "User '$UserName' has been successfully added to group '$GroupName'."
+            } catch {
+                Write-Host "Error adding user '$UserName' to group '$GroupName'. Details: $_"
+            }
+        } else {
+            Write-Host "Group '$GroupName' not found in Active Directory."
+        }
+    }
+} else {
+    Write-Host "User '$UserName' not found in Active Directory."
+}`;
+    } else if (groups.length === 1) {
+      return `$users = @(${usersArray
+        .map((user) => `"${user}"`)
+        .join(", ")})\n$group = "GS_Firmy_${
+        groupsArray[0]
+      }"\n\nif (Get-ADGroup -Filter {Name -eq $GroupName}) {
+    foreach ($UserName in $Users) {
+        if (Get-ADUser -Identity $UserName) {
+            try {
+                Add-ADGroupMember -Identity $GroupName -Members $UserName
+                Write-Host "User '$UserName' has been successfully added to group '$GroupName'."
+            } catch {
+                Write-Host "Error adding user '$UserName' to group '$GroupName'. Details: $_"
+            }
+        } else {
+            Write-Host "User '$UserName' not found in Active Directory."
+        }
+    }
+} else {
+    Write-Host "Group '$GroupName' not found in Active Directory."
+}`;
+    } else if (users.length > 1 && groups.length > 1) {
+      return `$users = @(${usersArray
+        .map((user) => `"${user}"`)
+        .join(", ")})\n$groups = @(${groupsArray
+        .map((group) => `"GS_Firmy_${group}"`)
+        .join(", ")})\n\nforeach ($UserName in $Users) {
+    try {
+        $user = Get-ADUser -Identity $UserName -ErrorAction Stop
+        foreach ($GroupName in $Groups) {
+            if (Get-ADGroup -Filter {Name -eq $GroupName}) {
+                try {
+                    Add-ADGroupMember -Identity $GroupName -Members $UserName
+                    Write-Host "User '$UserName' has been successfully added to group '$GroupName'."
+                } catch {
+                    Write-Host "Error adding user '$UserName' to group '$GroupName'. Details: $_"
+                }
+            } else {
+                Write-Host "Group '$GroupName' not found in Active Directory."
+            }
+        }
+    } catch {
+        Write-Host "User '$UserName' not found in Active Directory."
+    }
+}`;
+    } else {
+      return "Wpisz użytkownika(-ów) i grupę(-y), aby wygenerować kod";
+    }
+  }
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(code);
+  function copyToClipboard() {
+    navigator.clipboard.writeText(addUserToGroup(usersArray, groupsArray));
     setCopyButtonText("Copied");
 
     setTimeout(() => {
       setCopyButtonText("Copy");
     }, 2000);
-  };
+  }
 
   return (
     <div className={styles.codeWrapper}>
       <div className={styles.codeContainer}>
         <header className={styles.codeHeader}>
+          <span>Powershell</span>
+
           <button onClick={copyToClipboard}>
             <IoCopyOutline />
             <span>{copyButtonText}</span>
@@ -44,7 +123,11 @@ export const Code = ({ users, groups }: CodeProps) => {
         </header>
 
         <pre className={styles.codeBlock}>
-          <code>{code}</code>
+          <code>
+            {action === "add"
+              ? addUserToGroup(usersArray, groupsArray)
+              : "asdas"}
+          </code>
         </pre>
       </div>
     </div>

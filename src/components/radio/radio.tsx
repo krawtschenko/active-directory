@@ -4,7 +4,6 @@ import clsx from "clsx";
 
 type RadioProps = {
   options: Item[];
-  label?: string;
 } & React.ComponentProps<typeof RadioGroup.Root>;
 
 export type Item = {
@@ -13,7 +12,7 @@ export type Item = {
 };
 
 export const Radio = (props: RadioProps) => {
-  const { options, label, className, ...rest } = props;
+  const { options, className, ...rest } = props;
 
   return (
     <form>
@@ -22,8 +21,6 @@ export const Radio = (props: RadioProps) => {
         defaultValue={options[0].value}
         {...rest}
       >
-        {label && <label>{label}</label>}
-
         {options.map(({ label, value }) => {
           return (
             <div key={value} className={style.RadioGroupWrapper}>

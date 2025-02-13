@@ -12,10 +12,10 @@
       content: "";
 
       position: absolute;
-      top: -9px;
+      top: 50%;
       left: -9px;
       z-index: -1;
-      transform: scale(0);
+      transform: translateY(-50%) scale(0);
 
       display: block;
 
@@ -30,7 +30,7 @@
 
     .RadioGroupItem {
       all: unset;
-      background-color: #5f5959;
+      background-color: white;
       width: 16px;
       height: 16px;
       border-radius: 100%;
@@ -46,10 +46,10 @@
         &::after {
           content: "";
           display: block;
-          width: 8px;
-          height: 8px;
+          width: 10px;
+          height: 10px;
           border-radius: 50%;
-          background-color: #dc143c;
+          background-color: rgb(185, 28, 28);
         }
       }
 
@@ -59,10 +59,11 @@
     }
 
     .Label {
-      color: #974949;
-      font-size: 15px;
+      color: whitesmoke;
+      font-size: 18px;
       line-height: 1;
       padding-left: 10px;
+      transition: all 0.3s;
     }
 
     .RadioGroupItem,
@@ -71,8 +72,12 @@
     }
 
     &:hover {
+      .Label {
+        font-weight: bold;
+      }
+
       &::before {
-        transform: scale(1);
+        transform: translateY(-50%) scale(1);
       }
     }
   }
