@@ -1,8 +1,6 @@
 .codeWrapper {
   padding: 85px 10px 10px;
 
-  width: 50%;
-
   .codeContainer {
     position: relative;
     margin-bottom: 20px;
@@ -71,9 +69,9 @@
         font-family: "Courier Prime", monospace;
       }
     }
+  }
 
-    &:hover {
-      border-color: lightseagreen;
-    }
+  @media (max-width: 1023px) {
+    padding-top: 15px;
   }
 }

@@ -7,11 +7,14 @@
   }
 
   .inputWrapper {
+    display: flex;
+    align-items: center;
     padding: 5px;
     background-color: black;
     border: 1px solid darkred;
     border-radius: 8px;
     transition: all 0.2s;
+    column-gap: 4px;
 
     .input {
       background-color: unset;
@@ -23,6 +26,20 @@
 
       &:focus {
         outline: none;
+      }
+    }
+
+    button {
+      all: unset;
+
+      display: flex;
+      align-items: center;
+      color: darkred;
+      font-size: 20px;
+      cursor: pointer;
+
+      &:active {
+        color: lightseagreen;
       }
     }
 

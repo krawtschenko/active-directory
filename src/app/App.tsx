@@ -9,6 +9,9 @@ export const App = () => {
 
   const [users, setUsers] = useState("");
   const [groups, setGroups] = useState("");
+  const [folders, setFolders] = useState("");
+
+  const [kadry, setKadry] = useState(false);
 
   return (
     <div className={styles.app}>
@@ -16,12 +19,22 @@ export const App = () => {
         action={action}
         users={users}
         groups={groups}
+        folders={folders}
+        kadry={kadry}
         setAction={setAction}
         setUsers={setUsers}
         setGroups={setGroups}
+        setFolders={setFolders}
+        setKadry={setKadry}
       />
 
-      <Code action={action} users={users} groups={groups} />
+      <Code
+        action={action}
+        users={users}
+        groups={groups}
+        folders={folders}
+        kadry={kadry}
+      />
 
       <Animation />
     </div>

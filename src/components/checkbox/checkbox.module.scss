@@ -29,9 +29,10 @@
   }
 
   .CheckboxRoot {
-    background-color: whitesmoke;
+    background-color: black;
     width: 20px;
     height: 20px;
+    border: 1px solid darkred;
     border-radius: 4px;
     display: flex;
     align-items: center;
@@ -52,7 +53,7 @@
 
   .Label {
     color: whitesmoke;
-    padding-left: 15px;
+    padding-left: 10px;
     font-size: 15px;
     line-height: 1;
     cursor: pointer;
