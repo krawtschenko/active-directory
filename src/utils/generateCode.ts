@@ -61,23 +61,29 @@ function addUserToGroup(users: string[], groups: string[], suffix: string) {
     return "Wpisz nazwę użytkownika i grupy, aby wygenerować kod";
   }
 
-  const userNames = users.map((u) => `\"${u}\"`).join(", ");
+  const userNames = users.map((u) => `"${u}"`).join(", ");
   const groupNames = groups
-    .map((g) => `\"GS_Firmy_${g}${suffix ? `_${suffix}` : ""}\"`)
+    .map((g) => `"GS_Firmy_${g}${suffix ? `_${suffix}` : ""}"`)
     .join(", ");
 
   return `$Users = @(${userNames})
 $Groups = @(${groupNames})
 
+# Перевіряємо, які групи існують
+$ExistingGroups = @{}
+foreach ($GroupName in $Groups) {
+    if (Get-ADGroup -Filter {Name -eq $GroupName} -ErrorAction SilentlyContinue) {
+        $ExistingGroups[$GroupName] = $true
+    } else {
+        Write-Host "Group '$GroupName' does not exist."
+    }
+}
+
 foreach ($UserName in $Users) {
-    if (Get-ADUser -Filter {SamAccountName -eq $UserName}) {
-        foreach ($GroupName in $Groups) {
-            if (Get-ADGroup -Filter {Name -eq $GroupName}) {
-                Add-ADGroupMember -Identity $GroupName -Members $UserName
-                Write-Host "User '$UserName' successfully added to group '$GroupName'."
-            } else {
-                Write-Host "Group '$GroupName' does not exist."
-            }
+    if (Get-ADUser -Filter {SamAccountName -eq $UserName} -ErrorAction SilentlyContinue) {
+        foreach ($GroupName in $ExistingGroups.Keys) {
+            Add-ADGroupMember -Identity $GroupName -Members $UserName
+            Write-Host "User '$UserName' successfully added to group '$GroupName'."
         }
     } else {
         Write-Host "User '$UserName' does not exist."
