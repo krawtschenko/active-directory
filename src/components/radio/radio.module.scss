@@ -1,5 +1,6 @@
 .RadioGroupRoot {
   display: flex;
+  flex-wrap: wrap;
   gap: 14px;
 
   .RadioGroupWrapper {

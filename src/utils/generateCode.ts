@@ -1,6 +1,11 @@
-function createGroup(users: string[], groups: string[], kadry: boolean) {
+function createGroup(
+  users: string[],
+  groups: string[],
+  suffix: string,
+  kadry: boolean
+) {
   if (groups.length === 0) {
-    return 'Wpisz nazwę grupy, aby wygenerować kod"';
+    return "Wpisz nazwę grupy, aby wygenerować kod";
   }
 
   const path = kadry
@@ -9,57 +14,113 @@ function createGroup(users: string[], groups: string[], kadry: boolean) {
 
   const groupPrefix = kadry ? "GS_Firmy_KadryIPlace_" : "GS_Firmy_";
   const groupNames = groups
-    .map((g) => `"${groupPrefix}${g.replace(/\\/g, "_")}"`)
+    .map(
+      (g) =>
+        `"${groupPrefix}${g.replace(/\\/g, "_")}${suffix ? `_${suffix}` : ""}"`
+    )
     .join(", ");
-
   const userNames =
     users.length > 0 ? users.map((u) => `"${u}"`).join(", ") : "";
 
-  let script = `$OUPath = "${path}"\n$Groups = @(${groupNames})\n`;
-
-  if (users.length > 0) {
-    script += `$Users = @(${userNames})\n`;
-  }
-
-  script += `\nforeach ($GroupName in $Groups) {\n`;
-  script += `    New-ADGroup -Name $GroupName -Path $OUPath -GroupScope Global -GroupCategory Security\n`;
-  script += `    Write-Host "Group $GroupName successfully created"\n`;
-
-  if (users.length > 0) {
-    script += `    foreach ($UserName in $Users) {\n`;
-    script += `        Add-ADGroupMember -Identity $GroupName -Members $UserName\n`;
-    script += `        Write-Host "User $UserName successfully added to group $GroupName"\n`;
-    script += `    }\n`;
-  }
-
-  script += `}`;
-
-  return script;
+  return `$OUPath = "${path}"
+$Groups = @(${groupNames})
+${
+  users.length > 0
+    ? `$Users = @(${userNames})
+`
+    : ""
 }
 
-function addUserToGroup(users: string[], groups: string[]) {
+foreach ($GroupName in $Groups) {
+    if (-not (Get-ADGroup -Filter {Name -eq $GroupName})) {
+        New-ADGroup -Name $GroupName -Path $OUPath -GroupScope Global -GroupCategory Security
+        Write-Host "Group '$GroupName' successfully created."
+    } else {
+        Write-Host "Group '$GroupName' already exists."
+    }
+    ${
+      users.length > 0
+        ? `\n
+    if ($Users) {
+        foreach ($UserName in $Users) {
+            if (Get-ADUser -Filter {SamAccountName -eq $UserName}) {
+                Add-ADGroupMember -Identity $GroupName -Members $UserName
+                Write-Host "User '$UserName' successfully added to group '$GroupName'."
+            } else {
+                Write-Host "User '$UserName' does not exist."
+            }
+        }
+    }`
+        : ""
+    }
+}`;
+}
+
+function addUserToGroup(users: string[], groups: string[], suffix: string) {
   if (users.length === 0 || groups.length === 0) {
     return "Wpisz nazwę użytkownika i grupy, aby wygenerować kod";
   }
 
-  const userNames = users.map((u) => `"${u}"`).join(", ");
-  const groupNames = groups.map((g) => `"GS_Firmy_${g}"`).join(", ");
+  const userNames = users.map((u) => `\"${u}\"`).join(", ");
+  const groupNames = groups
+    .map((g) => `\"GS_Firmy_${g}${suffix ? `_${suffix}` : ""}\"`)
+    .join(", ");
 
-  return `$Users = @(${userNames})\n$Groups = @(${groupNames})\n\nforeach ($UserName in $Users) {\n    foreach ($GroupName in $Groups) {\n        Add-ADGroupMember -Identity $GroupName -Members $UserName\n        Write-Host "User '$UserName' successfully added to group '$GroupName'."\n    }\n}`;
+  return `$Users = @(${userNames})
+$Groups = @(${groupNames})
+
+foreach ($UserName in $Users) {
+    if (Get-ADUser -Filter {SamAccountName -eq $UserName}) {
+        foreach ($GroupName in $Groups) {
+            if (Get-ADGroup -Filter {Name -eq $GroupName}) {
+                Add-ADGroupMember -Identity $GroupName -Members $UserName
+                Write-Host "User '$UserName' successfully added to group '$GroupName'."
+            } else {
+                Write-Host "Group '$GroupName' does not exist."
+            }
+        }
+    } else {
+        Write-Host "User '$UserName' does not exist."
+    }
+}`;
 }
 
-function grantAccessRX(groups: string[], folders: string[]) {
-  if (groups.length === 0 || folders.length === 0) {
-    return "Wpisz nazwę folderu i nazwę grupy, aby wygenerować kod";
-  }
+// function grantAccessRX(groups: string[], folders: string[]) {
+//   if (groups.length === 0 || folders.length === 0) {
+//     return "Wpisz nazwę folderu i nazwę grupy, aby wygenerować kod";
+//   }
 
-  const sanitizedGroup = groups[0].replace(/\\/g, "_");
+//   const sanitizedGroup = groups[0].replace(/\\/g, "_");
+
+//   let code = "";
+
+//   folders.forEach((folder) => {
+//     code += `icacls "D:\\Firmy\\${folder}" /grant "GS_Firmy_${sanitizedGroup}:RX"\n`;
+//   });
+
+//   return code;
+// }
+
+function grantAccessRX(folders: string[], groups: string[], suffix: string) {
+  if (folders.length === 0) {
+    return "Wpisz nazwę folderu, aby wygenerować kod";
+  }
 
   let code = "";
 
-  folders.forEach((folder) => {
-    code += `icacls "D:\\Firmy\\${folder}" /grant "GS_Firmy_${sanitizedGroup}:RX"\n`;
-  });
+  if (groups.length > 0) {
+    const sanitizedGroup = groups[0].replace(/\\/g, "_");
+    folders.forEach((folder) => {
+      code += `icacls "D:\\Firmy\\${folder}" /grant "GS_Firmy_${sanitizedGroup}:RX"\n`;
+    });
+  } else {
+    folders.forEach((folder) => {
+      const group = suffix
+        ? `GS_Firmy_${folder}_${suffix}`
+        : `GS_Firmy_${folder}`;
+      code += `icacls "D:\\Firmy\\${folder}" /grant "${group}:RX"\n`;
+    });
+  }
 
   return code;
 }
@@ -79,21 +140,38 @@ function grantAccessM(folders: string[]) {
   return code;
 }
 
+function grantAccessSQL(users: string[], bases: string[]) {
+  if (users.length === 0 || bases.length === 0) {
+    return "Wpisz nazwę użytkownika i bazy, aby wygenerować kod";
+  } else {
+    let code = "";
+
+    users.forEach((u) => {
+      code += `USE ${bases[0]}\nCREATE USER [SZWAK\\${u}] FOR LOGIN [SZWAK\\${u}]\nALTER ROLE [db_owner] ADD MEMBER [SZWAK\\${u}]\n\n`;
+    });
+
+    return code;
+  }
+}
+
 export function generateCode(
   action: string,
   users: string[],
   groups: string[],
   folders: string[],
+  suffix: string,
   kadry: boolean
 ) {
   switch (action) {
     case "create":
-      return createGroup(users, groups, kadry);
+      return createGroup(users, groups, suffix, kadry);
     case "add":
-      return addUserToGroup(users, groups);
+      return addUserToGroup(users, groups, suffix);
     case "rx":
-      return grantAccessRX(groups, folders);
-    default:
+      return grantAccessRX(folders, groups, suffix);
+    case "m":
       return grantAccessM(folders);
+    default:
+      return grantAccessSQL(users, groups);
   }
 }

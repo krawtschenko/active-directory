@@ -8,11 +8,13 @@ type PrimaryProps = {
   users: string;
   groups: string;
   folders: string;
+  suffix: string;
   kadry: boolean;
   setAction: (action: string) => void;
   setUsers: (users: string) => void;
   setGroups: (groups: string) => void;
   setFolders: (folders: string) => void;
+  setSuffix: (suffix: string) => void;
   setKadry: (kadry: boolean) => void;
 };
 
@@ -22,11 +24,13 @@ export const Form = (props: PrimaryProps) => {
     users,
     groups,
     folders,
+    suffix,
     kadry,
     setAction,
     setUsers,
     setGroups,
     setFolders,
+    setSuffix,
     setKadry,
   } = props;
 
@@ -35,6 +39,7 @@ export const Form = (props: PrimaryProps) => {
     { label: "Dodanie do grupy", value: "add" },
     { label: "Nadanie Dostępu (:RX)", value: "rx" },
     { label: "Nadanie Dostępu (:M)", value: "m" },
+    { label: "SQL", value: "sql" },
   ];
 
   function changeAction(value: string) {
@@ -43,6 +48,7 @@ export const Form = (props: PrimaryProps) => {
     setUsers("");
     setGroups("");
     setFolders("");
+    setSuffix("");
     setKadry(false);
   }
 
@@ -56,7 +62,7 @@ export const Form = (props: PrimaryProps) => {
       />
 
       <div className={styles.inputs}>
-        {(action === "create" || action === "add") && (
+        {(action === "create" || action === "add" || action === "sql") && (
           <Input
             value={users}
             onChange={(value) => setUsers(value.currentTarget.value.trim())}
@@ -76,12 +82,32 @@ export const Form = (props: PrimaryProps) => {
           />
         )}
 
-        {action !== "m" && (
+        {action !== "m" && action !== "sql" && (
+          <>
+            <Input
+              value={groups}
+              onChange={(value) => setGroups(value.currentTarget.value.trim())}
+              placeholder="Grupa"
+              label="Nazwa grupy"
+              onClickButton={() => setGroups("")}
+            />
+
+            <Input
+              value={suffix}
+              onChange={(value) => setSuffix(value.currentTarget.value.trim())}
+              placeholder="Suffix"
+              label="Suffix grupy"
+              onClickButton={() => setSuffix("")}
+            />
+          </>
+        )}
+
+        {action === "sql" && (
           <Input
             value={groups}
             onChange={(value) => setGroups(value.currentTarget.value.trim())}
-            placeholder="Grupa"
-            label="Nazwa grupy"
+            placeholder="Baza"
+            label="Nazwa bazy SQL"
             onClickButton={() => setGroups("")}
           />
         )}

@@ -8,10 +8,18 @@ type CodeProps = {
   users: string;
   groups: string;
   folders: string;
+  suffix: string;
   kadry: boolean;
 };
 
-export const Code = ({ action, users, groups, folders, kadry }: CodeProps) => {
+export const Code = ({
+  action,
+  users,
+  groups,
+  folders,
+  suffix,
+  kadry,
+}: CodeProps) => {
   const [copyButtonText, setCopyButtonText] = useState("Copy");
 
   const usersArray = users.split(/[\s,]+/).filter(Boolean);
@@ -19,8 +27,16 @@ export const Code = ({ action, users, groups, folders, kadry }: CodeProps) => {
   const foldersArray = folders.split(/[\s,]+/).filter(Boolean);
 
   const generatedCode = useMemo(
-    () => generateCode(action, usersArray, groupsArray, foldersArray, kadry),
-    [action, users, groups, folders, kadry]
+    () =>
+      generateCode(
+        action,
+        usersArray,
+        groupsArray,
+        foldersArray,
+        suffix,
+        kadry
+      ),
+    [action, users, groups, folders, suffix, kadry]
   );
 
   async function copyToClipboard() {
@@ -38,7 +54,7 @@ export const Code = ({ action, users, groups, folders, kadry }: CodeProps) => {
     <div className={styles.codeWrapper}>
       <div className={styles.codeContainer}>
         <header className={styles.codeHeader}>
-          <span>Powershell</span>
+          <span>{action === "sql" ? "SQL" : "Powershell"}</span>
 
           <button onClick={copyToClipboard}>
             <IoCopyOutline />

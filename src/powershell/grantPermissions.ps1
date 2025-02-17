@@ -15,20 +15,3 @@ foreach ($name in $names) {
 }
 
 #-----------------------------------------------------------------------------------------------------------------------
-
-
-icacls "D:\Firmy\E1604\2025\WB" /grant "GS_Firmy_E1604_2025_WB_PKOBP_8980_PLN:RX"
-icacls "D:\Firmy\E1604\2025" /grant "GS_Firmy_E1604_2025_WB_PKOBP_8980_PLN:RX"
-icacls "D:\Firmy\E1604" /grant "GS_Firmy_E1604_2025_WB_PKOBP_8980_PLN:RX"
-
-icacls "D:\Firmy\E1604\IMPORT\WB" /grant "GS_Firmy_E1604_IMPORT_WB_PKOBP:RX"
-icacls "D:\Firmy\E1604\IMPORT" /grant "GS_Firmy_E1604_IMPORT_WB_PKOBP:RX"
-icacls "D:\Firmy\E1604" /grant "GS_Firmy_E1604_IMPORT_WB_PKOBP:RX"
-
-icacls "D:\Firmy\E0720\IMPORT\INNE" /grant "GS_Firmy_GS_Firmy_E0720_IMPORT_INNE:RX"
-icacls "D:\Firmy\E0720\IMPORT" /grant "GS_Firmy_GS_Firmy_E0720_IMPORT_INNE:RX"
-icacls "D:\Firmy\E0720" /grant "GS_Firmy_GS_Firmy_E0720_IMPORT_INNE:RX"
-
-
-
-E0720\IMPORT\INNE

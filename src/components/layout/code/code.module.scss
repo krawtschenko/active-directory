@@ -8,24 +8,6 @@
     border: 1px solid #8b0000;
     transition: all 0.2s;
     border-radius: 8px;
-    overflow: auto;
-
-    ::-webkit-scrollbar {
-      width: 3px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #111;
-      border-radius: 8px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: #333;
-    }
 
     .codeHeader {
       display: flex;

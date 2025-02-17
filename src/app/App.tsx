@@ -10,6 +10,7 @@ export const App = () => {
   const [users, setUsers] = useState("");
   const [groups, setGroups] = useState("");
   const [folders, setFolders] = useState("");
+  const [suffix, setSuffix] = useState("");
 
   const [kadry, setKadry] = useState(false);
 
@@ -20,11 +21,13 @@ export const App = () => {
         users={users}
         groups={groups}
         folders={folders}
+        suffix={suffix}
         kadry={kadry}
         setAction={setAction}
         setUsers={setUsers}
         setGroups={setGroups}
         setFolders={setFolders}
+        setSuffix={setSuffix}
         setKadry={setKadry}
       />
 
@@ -33,6 +36,7 @@ export const App = () => {
         users={users}
         groups={groups}
         folders={folders}
+        suffix={suffix}
         kadry={kadry}
       />
 
