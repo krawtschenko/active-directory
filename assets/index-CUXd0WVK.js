@@ -70,10 +70,9 @@ foreach ($GroupName in $Groups) {
             }
         }
     }`:""}
-}`}function i_(s,t,a){if(s.length===0||t.length===0)return"Wpisz nazwę użytkownika i grupy, aby wygenerować kod";const l=s.map(c=>`"${c}"`).join(", "),u=t.map(c=>`"GS_Firmy_${c}${a?`_${a}`:""}"`).join(", ");return`$Users = @(${l})
+}`}function i_(s,t,a){if(s.length===0||t.length===0)return"Wpisz nazwę użytkownika i grupy, aby wygenerować kod";const l=s.map(c=>`"${c}"`).join(", "),u=t.map(c=>`"GS_Firmy_${c}${a?`_${a}`:""}"`).join(", ").replace(/\\/g,"_");return`$Users = @(${l})
 $Groups = @(${u})
 
-# Перевіряємо, які групи існують
 $ExistingGroups = @{}
 foreach ($GroupName in $Groups) {
     if (Get-ADGroup -Filter {Name -eq $GroupName} -ErrorAction SilentlyContinue) {
