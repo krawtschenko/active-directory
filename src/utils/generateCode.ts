@@ -64,12 +64,11 @@ function addUserToGroup(users: string[], groups: string[], suffix: string) {
   const userNames = users.map((u) => `"${u}"`).join(", ");
   const groupNames = groups
     .map((g) => `"GS_Firmy_${g}${suffix ? `_${suffix}` : ""}"`)
-    .join(", ");
+    .join(", ").replace(/\\/g, "_");
 
   return `$Users = @(${userNames})
 $Groups = @(${groupNames})
 
-# Перевіряємо, які групи існують
 $ExistingGroups = @{}
 foreach ($GroupName in $Groups) {
     if (Get-ADGroup -Filter {Name -eq $GroupName} -ErrorAction SilentlyContinue) {
@@ -126,7 +125,6 @@ function grantAccessM(folders: string[], suffix: string) {
   folders.forEach((folder) => {
     const sanitizedFolder = suffix ? `${folder}\\${suffix}` : `${folder}`;
     const group = sanitizedFolder.replace(/\\/g, "_");
-    // const sanitizedFolder = folder.replace(/\\/g, "_");
 
     code += `icacls "D:\\Firmy\\${sanitizedFolder}" /grant "GS_Firmy_${group}:(OI)(CI)(M)"\n`;
   });
