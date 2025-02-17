@@ -62,6 +62,7 @@ export const Form = (props: PrimaryProps) => {
   const shouldShowUserInput = ["create", "add", "sql"].includes(action);
   const shouldShowFolderInput = ["rx", "m"].includes(action);
   const shouldShowGroupAndSuffix = !["m", "sql"].includes(action);
+  const shouldShowSuffixInput = ["m"].includes(action);
   const shouldShowSQLInput = action === "sql";
 
   return (
@@ -112,6 +113,16 @@ export const Form = (props: PrimaryProps) => {
               onClickButton={() => setSuffix("")}
             />
           </>
+        )}
+
+        {shouldShowSuffixInput && (
+          <Input
+            value={suffix}
+            onChange={handleInputChange(setSuffix)}
+            placeholder="Suffix"
+            label="Suffix grupy"
+            onClickButton={() => setSuffix("")}
+          />
         )}
 
         {shouldShowSQLInput && (

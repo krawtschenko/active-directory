@@ -110,7 +110,7 @@ function grantAccessRX(folders: string[], groups: string[], suffix: string) {
   return code;
 }
 
-function grantAccessM(folders: string[]) {
+function grantAccessM(folders: string[], suffix: string) {
   if (folders.length === 0) {
     return "Wpisz nazwę folderu, aby wygenerować kod";
   }
@@ -119,7 +119,7 @@ function grantAccessM(folders: string[]) {
 
   folders.forEach((folder) => {
     const sanitizedFolder = folder.replace(/\\/g, "_");
-    code += `icacls "D:\\Firmy\\${folder}" /grant "GS_Firmy_${sanitizedFolder}:(OI)(CI)(M)"\n`;
+    code += `icacls "D:\\Firmy\\${folder}_${suffix}" /grant "GS_Firmy_${sanitizedFolder}_${suffix}:(OI)(CI)(M)"\n`;
   });
 
   return code;
@@ -155,7 +155,7 @@ export function generateCode(
     case "rx":
       return grantAccessRX(folders, groups, suffix);
     case "m":
-      return grantAccessM(folders);
+      return grantAccessM(folders, suffix);
     default:
       return grantAccessSQL(users, groups);
   }
