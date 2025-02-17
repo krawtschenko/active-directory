@@ -85,22 +85,6 @@ foreach ($UserName in $Users) {
 }`;
 }
 
-// function grantAccessRX(groups: string[], folders: string[]) {
-//   if (groups.length === 0 || folders.length === 0) {
-//     return "Wpisz nazwę folderu i nazwę grupy, aby wygenerować kod";
-//   }
-
-//   const sanitizedGroup = groups[0].replace(/\\/g, "_");
-
-//   let code = "";
-
-//   folders.forEach((folder) => {
-//     code += `icacls "D:\\Firmy\\${folder}" /grant "GS_Firmy_${sanitizedGroup}:RX"\n`;
-//   });
-
-//   return code;
-// }
-
 function grantAccessRX(folders: string[], groups: string[], suffix: string) {
   if (folders.length === 0) {
     return "Wpisz nazwę folderu, aby wygenerować kod";
@@ -109,7 +93,8 @@ function grantAccessRX(folders: string[], groups: string[], suffix: string) {
   let code = "";
 
   if (groups.length > 0) {
-    const sanitizedGroup = groups[0].replace(/\\/g, "_");
+    const sanitizedGroup = groups[0]?.replace(/\\/g, "_") ?? "";
+
     folders.forEach((folder) => {
       code += `icacls "D:\\Firmy\\${folder}" /grant "GS_Firmy_${sanitizedGroup}:RX"\n`;
     });

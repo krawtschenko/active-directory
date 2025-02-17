@@ -2,6 +2,7 @@ import styles from "./form.module.scss";
 import { Input } from "../../input/input";
 import { Radio } from "../../radio/radio";
 import { Checkbox } from "../../checkbox/checkbox.tsx";
+import { ChangeEvent } from "react";
 
 type PrimaryProps = {
   action: string;
@@ -52,6 +53,17 @@ export const Form = (props: PrimaryProps) => {
     setKadry(false);
   }
 
+  function handleInputChange(setter: (value: string) => void) {
+    return (event: ChangeEvent<HTMLInputElement>) => {
+      setter(event.target.value.trim());
+    };
+  }
+
+  const shouldShowUserInput = ["create", "add", "sql"].includes(action);
+  const shouldShowFolderInput = ["rx", "m"].includes(action);
+  const shouldShowGroupAndSuffix = !["m", "sql"].includes(action);
+  const shouldShowSQLInput = action === "sql";
+
   return (
     <div className={styles.primary}>
       <Radio
@@ -62,31 +74,31 @@ export const Form = (props: PrimaryProps) => {
       />
 
       <div className={styles.inputs}>
-        {(action === "create" || action === "add" || action === "sql") && (
+        {shouldShowUserInput && (
           <Input
             value={users}
-            onChange={(value) => setUsers(value.currentTarget.value.trim())}
+            onChange={handleInputChange(setUsers)}
             placeholder="Użytkownik"
             label="Nazwa użytkownika"
             onClickButton={() => setUsers("")}
           />
         )}
 
-        {(action === "rx" || action === "m") && (
+        {shouldShowFolderInput && (
           <Input
             value={folders}
-            onChange={(value) => setFolders(value.currentTarget.value.trim())}
+            onChange={handleInputChange(setFolders)}
             placeholder="Folder"
             label="Nazwa folderu"
             onClickButton={() => setFolders("")}
           />
         )}
 
-        {action !== "m" && action !== "sql" && (
+        {shouldShowGroupAndSuffix && (
           <>
             <Input
               value={groups}
-              onChange={(value) => setGroups(value.currentTarget.value.trim())}
+              onChange={handleInputChange(setGroups)}
               placeholder="Grupa"
               label="Nazwa grupy"
               onClickButton={() => setGroups("")}
@@ -94,7 +106,7 @@ export const Form = (props: PrimaryProps) => {
 
             <Input
               value={suffix}
-              onChange={(value) => setSuffix(value.currentTarget.value.trim())}
+              onChange={handleInputChange(setSuffix)}
               placeholder="Suffix"
               label="Suffix grupy"
               onClickButton={() => setSuffix("")}
@@ -102,10 +114,10 @@ export const Form = (props: PrimaryProps) => {
           </>
         )}
 
-        {action === "sql" && (
+        {shouldShowSQLInput && (
           <Input
             value={groups}
-            onChange={(value) => setGroups(value.currentTarget.value.trim())}
+            onChange={handleInputChange(setGroups)}
             placeholder="Baza"
             label="Nazwa bazy SQL"
             onClickButton={() => setGroups("")}
@@ -116,7 +128,7 @@ export const Form = (props: PrimaryProps) => {
       {action === "create" && (
         <Checkbox
           checked={kadry}
-          onCheckedChange={(value) => setKadry(!!value)}
+          onCheckedChange={setKadry}
           className={styles.checkbox}
           label="Kadry i Płace"
         />

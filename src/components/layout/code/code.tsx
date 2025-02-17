@@ -12,19 +12,23 @@ type CodeProps = {
   kadry: boolean;
 };
 
-export const Code = ({
-  action,
-  users,
-  groups,
-  folders,
-  suffix,
-  kadry,
-}: CodeProps) => {
+export const Code = (props: CodeProps) => {
+  const { action, users, groups, folders, suffix, kadry } = props;
+
   const [copyButtonText, setCopyButtonText] = useState("Copy");
 
-  const usersArray = users.split(/[\s,]+/).filter(Boolean);
-  const groupsArray = groups.split(/[\s,]+/).filter(Boolean);
-  const foldersArray = folders.split(/[\s,]+/).filter(Boolean);
+  const usersArray = useMemo(
+    () => users.split(/[\s,]+/).filter(Boolean),
+    [users]
+  );
+  const groupsArray = useMemo(
+    () => groups.split(/[\s,]+/).filter(Boolean),
+    [groups]
+  );
+  const foldersArray = useMemo(
+    () => folders.split(/[\s,]+/).filter(Boolean),
+    [folders]
+  );
 
   const generatedCode = useMemo(
     () =>
@@ -63,7 +67,7 @@ export const Code = ({
         </header>
 
         <pre className={styles.codeBlock}>
-          <code>{generatedCode}</code>
+          <code>{generatedCode || "Brak wygenerowanego kodu"}</code>
         </pre>
       </div>
     </div>
