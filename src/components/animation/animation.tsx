@@ -1,6 +1,6 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
-import {type ISourceOptions } from "@tsparticles/engine";
+import { type ISourceOptions } from "@tsparticles/engine";
 import { loadFull } from "tsparticles";
 
 export const Animation = memo(() => {
@@ -13,7 +13,6 @@ export const Animation = memo(() => {
       setInit(true);
     });
   }, []);
-
 
   const options: ISourceOptions = useMemo(
     () => ({
@@ -53,7 +52,6 @@ export const Animation = memo(() => {
         events: {
           onClick: {
             enable: true,
-            mode: "push",
           },
           onDiv: {
             selectors: [],
