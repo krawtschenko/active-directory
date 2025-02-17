@@ -118,8 +118,11 @@ function grantAccessM(folders: string[], suffix: string) {
   let code = "";
 
   folders.forEach((folder) => {
-    const sanitizedFolder = folder.replace(/\\/g, "_");
-    code += `icacls "D:\\Firmy\\${folder}_${suffix}" /grant "GS_Firmy_${sanitizedFolder}_${suffix}:(OI)(CI)(M)"\n`;
+    const sanitizedFolder = suffix ? `${folder}\\${suffix}` : `${folder}`;
+    const group = sanitizedFolder.replace(/\\/g, "_");
+    // const sanitizedFolder = folder.replace(/\\/g, "_");
+
+    code += `icacls "D:\\Firmy\\${sanitizedFolder}" /grant "GS_Firmy_${group}:(OI)(CI)(M)"\n`;
   });
 
   return code;
