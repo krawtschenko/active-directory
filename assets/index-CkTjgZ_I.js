@@ -88,7 +88,7 @@ foreach ($UserName in $Users) {
     }
 }`}function n_(s,t,a){var u;if(s.length===0)return"Wpisz nazwę folderu, aby wygenerować kod";let l="";if(t.length>0){const c=((u=t[0])==null?void 0:u.replace(/\\/g,"_"))??"";s.forEach(d=>{l+=`icacls "D:\\Firmy\\${d}" /grant "GS_Firmy_${c}:RX"
 `})}else s.forEach(c=>{const d=a?`GS_Firmy_${c}_${a}`:`GS_Firmy_${c}`;l+=`icacls "D:\\Firmy\\${c}" /grant "${d}:RX"
-`});return l}function s_(s,t){if(s.length===0)return"Wpisz nazwę folderu, aby wygenerować kod";let a="";return s.forEach(l=>{const u=l.replace(/\\/g,"_");a+=`icacls "D:\\Firmy\\${l}_${t}" /grant "GS_Firmy_${u}_${t}:(OI)(CI)(M)"
+`});return l}function s_(s,t){if(s.length===0)return"Wpisz nazwę folderu, aby wygenerować kod";let a="";return s.forEach(l=>{const u=t?`${l}\\${t}`:`${l}`,c=u.replace(/\\/g,"_");a+=`icacls "D:\\Firmy\\${u}" /grant "GS_Firmy_${c}:(OI)(CI)(M)"
 `}),a}function a_(s,t){if(s.length===0||t.length===0)return"Wpisz nazwę użytkownika i bazy, aby wygenerować kod";{let a="";return s.forEach(l=>{a+=`USE ${t[0]}
 CREATE USER [SZWAK\\${l}] FOR LOGIN [SZWAK\\${l}]
 ALTER ROLE [db_owner] ADD MEMBER [SZWAK\\${l}]
