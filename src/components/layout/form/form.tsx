@@ -1,8 +1,10 @@
 import styles from "./form.module.scss";
+import { getInfo } from "../../../utils/getInfo.ts";
 import { Input } from "../../input/input";
 import { Radio } from "../../radio/radio";
 import { Checkbox } from "../../checkbox/checkbox.tsx";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState } from "react";
+import { LuInfo } from "react-icons/lu";
 
 type PrimaryProps = {
   action: string;
@@ -43,6 +45,8 @@ export const Form = (props: PrimaryProps) => {
     { label: "SQL", value: "sql" },
   ];
 
+  const [info, setInfo] = useState(false);
+
   function changeAction(value: string) {
     setAction(value);
 
@@ -51,6 +55,8 @@ export const Form = (props: PrimaryProps) => {
     setFolders("");
     setSuffix("");
     setKadry(false);
+
+    setInfo(false);
   }
 
   function handleInputChange(setter: (value: string) => void) {
@@ -67,83 +73,101 @@ export const Form = (props: PrimaryProps) => {
 
   return (
     <div className={styles.primary}>
-      <Radio
-        className={styles.radio}
-        options={options}
-        defaultValue={action}
-        onValueChange={changeAction}
-      />
+      <div className={styles.data}>
+        <Radio
+          className={styles.radio}
+          options={options}
+          defaultValue={action}
+          onValueChange={changeAction}
+        />
 
-      <div className={styles.inputs}>
-        {shouldShowUserInput && (
-          <Input
-            value={users}
-            onChange={handleInputChange(setUsers)}
-            placeholder="Użytkownik"
-            label="Nazwa użytkownika"
-            onClickButton={() => setUsers("")}
-          />
-        )}
-
-        {shouldShowFolderInput && (
-          <Input
-            value={folders}
-            onChange={handleInputChange(setFolders)}
-            placeholder="Folder"
-            label="Nazwa folderu"
-            onClickButton={() => setFolders("")}
-          />
-        )}
-
-        {shouldShowGroupAndSuffix && (
-          <>
+        <div className={styles.inputs}>
+          {shouldShowUserInput && (
             <Input
-              value={groups}
-              onChange={handleInputChange(setGroups)}
-              placeholder="Grupa"
-              label="Nazwa grupy"
-              onClickButton={() => setGroups("")}
+              value={users}
+              onChange={handleInputChange(setUsers)}
+              placeholder="Użytkownik"
+              label="Nazwa użytkownika"
+              onClickButton={() => setUsers("")}
             />
+          )}
 
+          {shouldShowFolderInput && (
+            <Input
+              value={folders}
+              onChange={handleInputChange(setFolders)}
+              placeholder="Folder"
+              label="Nazwa folderu"
+              onClickButton={() => setFolders("")}
+            />
+          )}
+
+          {shouldShowGroupAndSuffix && (
+            <>
+              <Input
+                value={groups}
+                onChange={handleInputChange(setGroups)}
+                placeholder="Grupa"
+                label="Nazwa grupy"
+                onClickButton={() => setGroups("")}
+              />
+
+              <Input
+                value={suffix}
+                onChange={handleInputChange(setSuffix)}
+                placeholder="Sufiks"
+                label="Sufiks grupy"
+                onClickButton={() => setSuffix("")}
+              />
+            </>
+          )}
+
+          {shouldShowSuffixInput && (
             <Input
               value={suffix}
               onChange={handleInputChange(setSuffix)}
-              placeholder="Suffix"
-              label="Suffix grupy"
+              placeholder="Sufiks"
+              label="Sufiks grupy"
               onClickButton={() => setSuffix("")}
             />
-          </>
-        )}
+          )}
 
-        {shouldShowSuffixInput && (
-          <Input
-            value={suffix}
-            onChange={handleInputChange(setSuffix)}
-            placeholder="Suffix"
-            label="Suffix grupy"
-            onClickButton={() => setSuffix("")}
-          />
-        )}
+          {shouldShowSQLInput && (
+            <Input
+              value={groups}
+              onChange={handleInputChange(setGroups)}
+              placeholder="Baza"
+              label="Nazwa bazy SQL"
+              onClickButton={() => setGroups("")}
+            />
+          )}
+        </div>
 
-        {shouldShowSQLInput && (
-          <Input
-            value={groups}
-            onChange={handleInputChange(setGroups)}
-            placeholder="Baza"
-            label="Nazwa bazy SQL"
-            onClickButton={() => setGroups("")}
+        {action === "create" && (
+          <Checkbox
+            checked={kadry}
+            onCheckedChange={setKadry}
+            className={styles.checkbox}
+            label="Kadry i Płace"
           />
         )}
       </div>
 
-      {action === "create" && (
-        <Checkbox
-          checked={kadry}
-          onCheckedChange={setKadry}
-          className={styles.checkbox}
-          label="Kadry i Płace"
-        />
-      )}
+      <div className={styles.infoWrapper}>
+        {info && (
+          <div className={styles.infoBlock}>
+            <pre>{getInfo(action)}</pre>
+          </div>
+        )}
+
+        <button
+          onClick={() => setInfo(!info)}
+          className={styles.infoButton}
+          title="Get info"
+        >
+          <LuInfo />
+        </button>
+      </div>
     </div>
   );
 };

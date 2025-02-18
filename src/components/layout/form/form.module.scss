@@ -1,18 +1,91 @@
 .primary {
+  height: 100vh;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 
-  .radio {
-    margin-top: 15px;
+  .data {
+    .radio {
+      margin-top: 15px;
+    }
+
+    .inputs {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      row-gap: 10px;
+    }
+
+    .checkbox {
+      margin-top: 10px;
+    }
   }
 
-  .inputs {
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-    row-gap: 10px;
-  }
+  .infoWrapper {
+    .infoBlock {
+      position: relative;
+      max-width: 730px;
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: black;
+      border: 1px solid #8b0000;
+      border-radius: 8px;
+      color: white;
 
-  .checkbox {
-    margin-top: 10px;
+      pre {
+        font-family: "Nunito", sans-serif;
+        white-space: pre-wrap;
+        text-align: justify;
+      }
+
+      &::before {
+        content: "";
+        position: absolute;
+        bottom: -20px;
+        left: 10px;
+        border-width: 10px;
+        border-style: solid;
+        border-color: #8b0000 transparent transparent transparent;
+      }
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: -17px;
+        left: 11px;
+        border-width: 9px;
+        border-style: solid;
+        border-color: black transparent transparent transparent;
+      }
+    }
+
+    .infoButton {
+      all: unset;
+      display: flex;
+      margin-left: 6px;
+      font-size: 30px;
+      color: rgb(179, 0, 0);
+      transition: all 0.2s;
+      animation: pulse-shadow 1.5s infinite;
+      border-radius: 50%;
+      cursor: pointer;
+
+      &:hover {
+        color: whitesmoke;
+      }
+    }
+  }
+}
+
+@keyframes pulse-shadow {
+  0% {
+    box-shadow: 0 0 5px rgba(179, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 15px red;
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(179, 0, 0, 0.5);
   }
 }
