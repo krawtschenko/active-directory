@@ -34,9 +34,9 @@ ${
 foreach ($GroupName in $Groups) {
     if (-not (Get-ADGroup -Filter {Name -eq $GroupName})) {
         New-ADGroup -Name $GroupName -Path $OUPath -GroupScope Global -GroupCategory Security
-        Write-Host "Group '$GroupName' successfully created." -ForegroundColor Green -ForegroundColor Green
+        Write-Host "Group '$GroupName' successfully created." -ForegroundColor Green
     } else {
-        Write-Host "Group '$GroupName' already exists." -ForegroundColor Yellow -ForegroundColor Yellow
+        Write-Host "Group '$GroupName' already exists." -ForegroundColor Yellow
     }
     ${
       users.length > 0
@@ -45,9 +45,9 @@ foreach ($GroupName in $Groups) {
         foreach ($UserName in $Users) {
             if (Get-ADUser -Filter {SamAccountName -eq $UserName}) {
                 Add-ADGroupMember -Identity $GroupName -Members $UserName
-                Write-Host "User '$UserName' successfully added to group '$GroupName'." -ForegroundColor Green -ForegroundColor Green
+                Write-Host "User '$UserName' successfully added to group '$GroupName'." -ForegroundColor Green
             } else {
-                Write-Host "User '$UserName' does not exist." -ForegroundColor Red -ForegroundColor Red
+                Write-Host "User '$UserName' does not exist." -ForegroundColor Red
             }
         }
     }`
@@ -75,7 +75,7 @@ foreach ($GroupName in $Groups) {
     if (Get-ADGroup -Filter {Name -eq $GroupName} -ErrorAction SilentlyContinue) {
         $ExistingGroups[$GroupName] = $true
     } else {
-        Write-Host "Group '$GroupName' does not exist." -ForegroundColor Red -ForegroundColor Red
+        Write-Host "Group '$GroupName' does not exist." -ForegroundColor Red
     }
 }
 
@@ -83,10 +83,10 @@ foreach ($UserName in $Users) {
     if (Get-ADUser -Filter {SamAccountName -eq $UserName} -ErrorAction SilentlyContinue) {
         foreach ($GroupName in $ExistingGroups.Keys) {
             Add-ADGroupMember -Identity $GroupName -Members $UserName
-            Write-Host "User '$UserName' successfully added to group '$GroupName'." -ForegroundColor Green -ForegroundColor Green
+            Write-Host "User '$UserName' successfully added to group '$GroupName'." -ForegroundColor Green
         }
     } else {
-        Write-Host "User '$UserName' does not exist." -ForegroundColor Red -ForegroundColor Red
+        Write-Host "User '$UserName' does not exist." -ForegroundColor Red
     }
 }`;
 }

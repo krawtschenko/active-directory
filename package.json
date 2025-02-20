@@ -1,6 +1,5 @@
 {
   "name": "active-directory",
-  "homepage": "https://krawtschenko.github.io/active-directory/",
   "private": true,
   "version": "0.0.0",
   "type": "module",
