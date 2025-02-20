@@ -34,20 +34,20 @@ ${
 foreach ($GroupName in $Groups) {
     if (-not (Get-ADGroup -Filter {Name -eq $GroupName})) {
         New-ADGroup -Name $GroupName -Path $OUPath -GroupScope Global -GroupCategory Security
-        Write-Host "Group '$GroupName' successfully created."
+        Write-Host "Group '$GroupName' successfully created." -ForegroundColor Green -ForegroundColor Green
     } else {
-        Write-Host "Group '$GroupName' already exists."
+        Write-Host "Group '$GroupName' already exists." -ForegroundColor Yellow -ForegroundColor Yellow
     }
     ${
       users.length > 0
-        ? `\n
+        ? `
     if ($Users) {
         foreach ($UserName in $Users) {
             if (Get-ADUser -Filter {SamAccountName -eq $UserName}) {
                 Add-ADGroupMember -Identity $GroupName -Members $UserName
-                Write-Host "User '$UserName' successfully added to group '$GroupName'."
+                Write-Host "User '$UserName' successfully added to group '$GroupName'." -ForegroundColor Green -ForegroundColor Green
             } else {
-                Write-Host "User '$UserName' does not exist."
+                Write-Host "User '$UserName' does not exist." -ForegroundColor Red -ForegroundColor Red
             }
         }
     }`
@@ -64,7 +64,8 @@ function addUserToGroup(users: string[], groups: string[], suffix: string) {
   const userNames = users.map((u) => `"${u}"`).join(", ");
   const groupNames = groups
     .map((g) => `"GS_Firmy_${g}${suffix ? `_${suffix}` : ""}"`)
-    .join(", ").replace(/\\/g, "_");
+    .join(", ")
+    .replace(/\\/g, "_");
 
   return `$Users = @(${userNames})
 $Groups = @(${groupNames})
@@ -74,7 +75,7 @@ foreach ($GroupName in $Groups) {
     if (Get-ADGroup -Filter {Name -eq $GroupName} -ErrorAction SilentlyContinue) {
         $ExistingGroups[$GroupName] = $true
     } else {
-        Write-Host "Group '$GroupName' does not exist."
+        Write-Host "Group '$GroupName' does not exist." -ForegroundColor Red -ForegroundColor Red
     }
 }
 
@@ -82,10 +83,10 @@ foreach ($UserName in $Users) {
     if (Get-ADUser -Filter {SamAccountName -eq $UserName} -ErrorAction SilentlyContinue) {
         foreach ($GroupName in $ExistingGroups.Keys) {
             Add-ADGroupMember -Identity $GroupName -Members $UserName
-            Write-Host "User '$UserName' successfully added to group '$GroupName'."
+            Write-Host "User '$UserName' successfully added to group '$GroupName'." -ForegroundColor Green -ForegroundColor Green
         }
     } else {
-        Write-Host "User '$UserName' does not exist."
+        Write-Host "User '$UserName' does not exist." -ForegroundColor Red -ForegroundColor Red
     }
 }`;
 }
