@@ -2,12 +2,14 @@
   "name": "active-directory",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
+  "type": "commonjs",
+  "main": "main.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "electron ."
   },
   "dependencies": {
     "@fontsource/courier-prime": "^5.1.1",
@@ -27,6 +29,7 @@
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react-swc": "^3.7.2",
+    "electron": "^34.2.0",
     "eslint": "^9.19.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.18",
