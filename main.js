@@ -1,31 +1,32 @@
-const { app, BrowserWindow } = require('electron');
-const path = require('path');
+const { app, BrowserWindow } = require("electron");
+const path = require("path");
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
-    width: 1610,
+    width: 1650,
     height: 1000,
-    icon: path.join(__dirname, 'build', 'icon.png'),
-    // webPreferences: {
-    //   preload: path.join(__dirname, 'preload.js'),
-    //   nodeIntegration: true,
-    // },
+    icon: path.join(__dirname, "build", "icon.png"),
+    webPreferences: {
+      nodeIntegration: true,
+    },
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'dist', 'index.html'));
+  mainWindow.loadFile(path.join(__dirname, "dist", "index.html"));
+  //   mainWindow.webContents.openDevTools();
 
-//   mainWindow.webContents.openDevTools();
+  // Відключаємо меню
+  mainWindow.removeMenu(); // Викликаємо метод як функцію
 }
 
 app.whenReady().then(createWindow);
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
     app.quit();
   }
 });
 
-app.on('activate', () => {
+app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
