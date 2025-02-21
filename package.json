@@ -9,7 +9,26 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "electron ."
+    "start": "electron .",
+    "build:react": "vite build",
+    "dist": "vite build && electron-builder"
+  },
+  "build": {
+    "appId": "my.ad.com",
+    "productName": "Active directory",
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
+    "files": [
+      "dist/**/*",
+      "main.js",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png"
+    }
   },
   "dependencies": {
     "@fontsource/courier-prime": "^5.1.1",
@@ -30,6 +49,7 @@
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react-swc": "^3.7.2",
     "electron": "^34.2.0",
+    "electron-builder": "^25.1.8",
     "eslint": "^9.19.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.18",
