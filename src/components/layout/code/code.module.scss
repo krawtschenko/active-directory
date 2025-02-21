@@ -47,6 +47,20 @@
       font-size: 14px;
       color: #f8f4f2;
 
+      &::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: #333;
+        border-radius: 4px;
+      }
+
+      &::-webkit-scrollbar-thumb:hover {
+        background-color: #4d4d4d;
+      }
+
       code {
         font-family: "Courier Prime", monospace;
       }
