@@ -102,14 +102,14 @@ function grantAccessRX(folders: string[], groups: string[], suffix: string) {
     const sanitizedGroup = groups[0]?.replace(/\\/g, "_") ?? "";
 
     folders.forEach((folder) => {
-      code += `icacls "D:\\Firmy\\${folder}" /grant "GS_Firmy_${sanitizedGroup}:RX"\n`;
+      code += `icacls "\\\\SRV04\\Firmy\\${folder}" /grant "GS_Firmy_${sanitizedGroup}:RX"\n`;
     });
   } else {
     folders.forEach((folder) => {
       const group = suffix
         ? `GS_Firmy_${folder}_${suffix}`
         : `GS_Firmy_${folder}`;
-      code += `icacls "D:\\Firmy\\${folder}" /grant "${group}:RX"\n`;
+      code += `icacls "\\\\SRV04\\Firmy\\${folder}" /grant "${group}:RX"\n`;
     });
   }
 
@@ -127,7 +127,7 @@ function grantAccessM(folders: string[], suffix: string) {
     const sanitizedFolder = suffix ? `${folder}\\${suffix}` : `${folder}`;
     const group = sanitizedFolder.replace(/\\/g, "_");
 
-    code += `icacls "D:\\Firmy\\${sanitizedFolder}" /grant "GS_Firmy_${group}:(OI)(CI)(M)"\n`;
+    code += `icacls "\\\\SRV04\\Firmy\\${sanitizedFolder}" /grant "GS_Firmy_${group}:(OI)(CI)(M)"\n`;
   });
 
   return code;
