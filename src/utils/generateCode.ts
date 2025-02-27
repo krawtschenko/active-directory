@@ -1,3 +1,35 @@
+function createFolder(location: string, folders: string[]) {
+  if (!folders?.length) {
+    return "Wpisz nazwę folderu, aby wygenerować kod";
+  }
+
+  const foldersList = folders.map((f) => `"${f}"`).join(", ");
+
+  return `$path = "\\\\SRV04\\Firmy\\${location}"
+
+if (-Not (Test-Path $path)) {
+    Write-Host "Location does not exist: $path" -ForegroundColor Red
+    return
+}
+
+$folders = @(${foldersList})
+
+foreach ($folder in $folders) {
+    $fullPath = "$path\\$folder"
+    
+    if (Test-Path $fullPath) {
+        Write-Host "Already exists: $folder" -ForegroundColor Yellow
+    } else {
+        try {
+            New-Item -Path $fullPath -ItemType Directory -ErrorAction Stop | Out-Null
+            Write-Host "Successfully created: $folder" -ForegroundColor Green
+        } catch {
+            Write-Host "Failed to create: $folder" -ForegroundColor Red
+        }
+    }
+}`;
+}
+
 function createGroup(
   users: string[],
   groups: string[],
@@ -149,6 +181,7 @@ function grantAccessSQL(users: string[], bases: string[]) {
 
 export function generateCode(
   action: string,
+  location: string,
   users: string[],
   groups: string[],
   folders: string[],
@@ -156,6 +189,8 @@ export function generateCode(
   kadry: boolean
 ) {
   switch (action) {
+    case "createFolder":
+      return createFolder(location, folders);
     case "create":
       return createGroup(users, groups, suffix, kadry);
     case "add":

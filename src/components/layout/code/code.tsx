@@ -5,6 +5,7 @@ import { generateCode } from "../../../utils/generateCode";
 
 type CodeProps = {
   action: string;
+  location: string;
   users: string;
   groups: string;
   folders: string;
@@ -13,7 +14,7 @@ type CodeProps = {
 };
 
 export const Code = (props: CodeProps) => {
-  const { action, users, groups, folders, suffix, kadry } = props;
+  const { action, location, users, groups, folders, suffix, kadry } = props;
 
   const [copyButtonText, setCopyButtonText] = useState("Copy");
 
@@ -34,13 +35,14 @@ export const Code = (props: CodeProps) => {
     () =>
       generateCode(
         action,
+        location,
         usersArray,
         groupsArray,
         foldersArray,
         suffix,
         kadry
       ),
-    [action, users, groups, folders, suffix, kadry]
+    [action, location, users, groups, folders, suffix, kadry]
   );
 
   async function copyToClipboard() {

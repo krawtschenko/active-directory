@@ -6,12 +6,14 @@ import { ChangeEvent } from "react";
 
 type PrimaryProps = {
   action: string;
+  location: string;
   users: string;
   groups: string;
   folders: string;
   suffix: string;
   kadry: boolean;
   setAction: (action: string) => void;
+  setLocation: (location: string) => void;
   setUsers: (users: string) => void;
   setGroups: (groups: string) => void;
   setFolders: (folders: string) => void;
@@ -22,12 +24,14 @@ type PrimaryProps = {
 export const Form = (props: PrimaryProps) => {
   const {
     action,
+    location,
     users,
     groups,
     folders,
     suffix,
     kadry,
     setAction,
+    setLocation,
     setUsers,
     setGroups,
     setFolders,
@@ -36,6 +40,7 @@ export const Form = (props: PrimaryProps) => {
   } = props;
 
   const options = [
+    { label: "Tworzenie folderu", value: "createFolder" },
     { label: "Tworzenie grupy", value: "create" },
     { label: "Dodanie do grupy", value: "add" },
     { label: "Nadanie Dostępu (:RX)", value: "rx" },
@@ -46,6 +51,7 @@ export const Form = (props: PrimaryProps) => {
   function changeAction(value: string) {
     setAction(value);
 
+    setLocation("");
     setUsers("");
     setGroups("");
     setFolders("");
@@ -59,9 +65,12 @@ export const Form = (props: PrimaryProps) => {
     };
   }
 
+  const shouldShowLocationInput = ["createFolder"].includes(action);
   const shouldShowUserInput = ["create", "add", "sql"].includes(action);
   const shouldShowFolderInput = ["rx", "m"].includes(action);
-  const shouldShowGroupAndSuffix = !["m", "sql"].includes(action);
+  const shouldShowGroupAndSuffix = !["m", "sql", "createFolder"].includes(
+    action
+  );
   const shouldShowSuffixInput = ["m"].includes(action);
   const shouldShowSQLInput = action === "sql";
 
@@ -75,6 +84,26 @@ export const Form = (props: PrimaryProps) => {
       />
 
       <div className={styles.inputs}>
+        {shouldShowLocationInput && (
+          <>
+            <Input
+              value={folders}
+              onChange={handleInputChange(setFolders)}
+              placeholder="Folder"
+              label="Nazwa folderu"
+              onClickButton={() => setFolders("")}
+            />
+
+            <Input
+              value={location}
+              onChange={handleInputChange(setLocation)}
+              placeholder="Lokalizacja"
+              label="Lokalizacja folderu"
+              onClickButton={() => setLocation("")}
+            />
+          </>
+        )}
+
         {shouldShowUserInput && (
           <Input
             value={users}

@@ -5,8 +5,9 @@ import styles from "./app.module.scss";
 import { Animation } from "../components/animation/animation";
 
 export const App = () => {
-  const [action, setAction] = useState("create");
+  const [action, setAction] = useState("createFolder");
 
+  const [location, setLocation] = useState("");
   const [users, setUsers] = useState("");
   const [groups, setGroups] = useState("");
   const [folders, setFolders] = useState("");
@@ -18,12 +19,14 @@ export const App = () => {
     <div className={styles.app}>
       <Form
         action={action}
+        location={location}
         users={users}
         groups={groups}
         folders={folders}
         suffix={suffix}
         kadry={kadry}
         setAction={setAction}
+        setLocation={setLocation}
         setUsers={setUsers}
         setGroups={setGroups}
         setFolders={setFolders}
@@ -33,6 +36,7 @@ export const App = () => {
 
       <Code
         action={action}
+        location={location}
         users={users}
         groups={groups}
         folders={folders}
