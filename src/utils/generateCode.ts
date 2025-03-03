@@ -141,7 +141,10 @@ function grantAccessRX(folders: string[], groups: string[], suffix: string) {
       const group = suffix
         ? `GS_Firmy_${folder}_${suffix}`
         : `GS_Firmy_${folder}`;
-      code += `icacls "\\\\SRV04\\Firmy\\${folder}" /grant "${group}:RX"\n`;
+
+      const sanitizedGroup = group?.replace(/\\/g, "_") ?? "";
+
+      code += `icacls "\\\\SRV04\\Firmy\\${folder}" /grant "${sanitizedGroup}:RX"\n`;
     });
   }
 
