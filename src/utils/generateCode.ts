@@ -131,10 +131,12 @@ function grantAccessRX(folders: string[], groups: string[], suffix: string) {
   let code = "";
 
   if (groups.length > 0) {
-    const sanitizedGroup = groups[0]?.replace(/\\/g, "_") ?? "";
-
     folders.forEach((folder) => {
-      code += `icacls "\\\\SRV04\\Firmy\\${folder}" /grant "GS_Firmy_${sanitizedGroup}:RX"\n`;
+      groups.forEach((group) => {
+        const sanitizedGroup = group?.replace(/\\/g, "_") ?? "";
+
+        code += `icacls "\\\\SRV04\\Firmy\\${folder}" /grant "GS_Firmy_${sanitizedGroup}:RX"\n`;
+      });
     });
   } else {
     folders.forEach((folder) => {
