@@ -177,7 +177,9 @@ function grantAccessSQL(users: string[], bases: string[]) {
     let code = "";
 
     users.forEach((u) => {
-      code += `USE ${bases[0]}\nCREATE USER [SZWAK\\${u}] FOR LOGIN [SZWAK\\${u}]\nALTER ROLE [db_owner] ADD MEMBER [SZWAK\\${u}]\n\n`;
+      bases.forEach((b) => {
+        code += `USE ${b}\nCREATE USER [SZWAK\\${u}] FOR LOGIN [SZWAK\\${u}]\nALTER ROLE [db_owner] ADD MEMBER [SZWAK\\${u}]\n\n`;
+      });
     });
 
     return code;
