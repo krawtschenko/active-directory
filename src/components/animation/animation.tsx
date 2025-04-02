@@ -19,6 +19,7 @@ export const Animation = memo(() => {
       autoPlay: true,
       background: {
         color: {
+          // Background color
           value: "#000000",
         },
         image: "",
@@ -60,7 +61,7 @@ export const Animation = memo(() => {
             type: "circle",
           },
           onHover: {
-            enable: true,
+            enable: false,
             mode: "grab",
             parallax: {
               enable: true,
@@ -204,7 +205,8 @@ export const Animation = memo(() => {
           },
         },
         color: {
-          value: "#ff0000",
+          // Circle color
+          value: "#006400",
           animation: {
             h: {
               count: 0,
@@ -473,6 +475,7 @@ export const Animation = memo(() => {
           },
           width: 1,
         },
+        // Lines
         links: {
           blink: false,
           color: {
@@ -480,7 +483,7 @@ export const Animation = memo(() => {
           },
           consent: false,
           distance: 150,
-          enable: true,
+          enable: false,
           frequency: 1,
           opacity: 0.4,
           shadow: {
