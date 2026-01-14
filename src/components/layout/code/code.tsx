@@ -10,11 +10,12 @@ type CodeProps = {
   groups: string;
   folders: string;
   suffix: string;
+  prefix: string;
   kadry: boolean;
 };
 
 export const Code = (props: CodeProps) => {
-  const { action, location, users, groups, folders, suffix, kadry } = props;
+  const { action, location, users, groups, folders, suffix, prefix, kadry } = props;
 
   const [copyButtonText, setCopyButtonText] = useState("Copy");
 
@@ -40,9 +41,10 @@ export const Code = (props: CodeProps) => {
         groupsArray,
         foldersArray,
         suffix,
+        prefix,
         kadry
       ),
-    [action, location, users, groups, folders, suffix, kadry]
+    [action, location, users, groups, folders, prefix, suffix, kadry]
   );
 
   async function copyToClipboard() {

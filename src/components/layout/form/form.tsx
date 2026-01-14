@@ -10,6 +10,7 @@ type PrimaryProps = {
 	groups: string;
 	folders: string;
 	suffix: string;
+	prefix: string
 	kadry: boolean;
 	setAction: (action: string) => void;
 	setLocation: (location: string) => void;
@@ -17,6 +18,7 @@ type PrimaryProps = {
 	setGroups: (groups: string) => void;
 	setFolders: (folders: string) => void;
 	setSuffix: (suffix: string) => void;
+	setPrefix: (prefix: string) => void;
 	setKadry: (kadry: boolean) => void;
 };
 
@@ -28,12 +30,14 @@ export const Form = (props: PrimaryProps) => {
 		groups,
 		folders,
 		suffix,
+		prefix,
 		kadry,
 		setLocation,
 		setUsers,
 		setGroups,
 		setFolders,
 		setSuffix,
+		setPrefix,
 		setKadry,
 	} = props;
 
@@ -50,6 +54,7 @@ export const Form = (props: PrimaryProps) => {
 		action
 	);
 	const shouldShowSuffixInput = ["m"].includes(action);
+	const shouldShowPrefixInput = ["rx"].includes(action);
 	const shouldShowSQLInput = action === "sql";
 
 	return (
@@ -104,6 +109,16 @@ export const Form = (props: PrimaryProps) => {
 							label="Nazwa grupy"
 							onClickButton={() => setGroups("")}
 						/>
+
+						{!shouldShowPrefixInput &&
+							<Input
+								value={prefix}
+								onChange={handleInputChange(setPrefix)}
+								placeholder="Prefiks"
+								label="Prefiks grupy"
+								onClickButton={() => setPrefix("")}
+							/>
+						}
 
 						<Input
 							value={suffix}
