@@ -52,7 +52,7 @@ export const Animation = memo(() => {
         detectsOn: "window",
         events: {
           onClick: {
-            enable: true,
+            enable: false,
           },
           onDiv: {
             selectors: [],
@@ -264,7 +264,7 @@ export const Animation = memo(() => {
           distance: {},
           direction: "none",
           drift: 0,
-          enable: true,
+          enable: false,
           gravity: {
             acceleration: 9.81,
             enable: false,
