@@ -161,6 +161,52 @@ foreach ($UserName in $Users) {
 // 	return code;
 // }
 
+// function grantAccessRX(
+// 	folders: string[],
+// 	groups: string[],
+// 	suffix: string
+// ) {
+// 	if (folders.length === 0) {
+// 		return "Wpisz nazwę folderu, aby wygenerować kod";
+// 	}
+//
+// 	let code = "";
+//
+// 	const buildPaths = (path: string) => {
+// 		const parts = path.split("/").filter(Boolean);
+// 		const result: string[] = [];
+//
+// 		for (let i = parts.length; i > 0; i--) {
+// 			result.push(parts.slice(0, i).join("/"));
+// 		}
+//
+// 		return result;
+// 	};
+//
+// 	folders.forEach((folder) => {
+// 		const paths = buildPaths(folder);
+//
+// 		paths.forEach((currentPath) => {
+// 			if (groups.length > 0) {
+// 				groups.forEach((group) => {
+// 					const sanitizedGroup = group.replace(/\\/g, "_");
+// 					code += `icacls "\\\\SRV04\\Firmy\\${currentPath}" /grant "GS_Firmy_${sanitizedGroup}:RX"\n`;
+// 				});
+// 			} else {
+// 				const groupName = suffix
+// 					? `GS_Firmy_${currentPath}_${suffix}`
+// 					: `GS_Firmy_${currentPath}`;
+//
+// 				const sanitizedGroup = groupName.replace(/\\/g, "_");
+//
+// 				code += `icacls "\\\\SRV04\\Firmy\\${currentPath}" /grant "${sanitizedGroup}:RX"\n`;
+// 			}
+// 		});
+// 	});
+//
+// 	return code;
+// }
+
 function grantAccessRX(
 	folders: string[],
 	groups: string[],
@@ -171,6 +217,11 @@ function grantAccessRX(
 	}
 
 	let code = "";
+
+	const suffixes = suffix
+	.split(",")
+	.map(s => s.trim())
+	.filter(Boolean);
 
 	const buildPaths = (path: string) => {
 		const parts = path.split("/").filter(Boolean);
@@ -193,19 +244,26 @@ function grantAccessRX(
 					code += `icacls "\\\\SRV04\\Firmy\\${currentPath}" /grant "GS_Firmy_${sanitizedGroup}:RX"\n`;
 				});
 			} else {
-				const groupName = suffix
-					? `GS_Firmy_${currentPath}_${suffix}`
-					: `GS_Firmy_${currentPath}`;
+				if (suffixes.length > 0) {
+					suffixes.forEach((suf) => {
+						const groupName = `GS_Firmy_${currentPath}_${suf}`;
+						const sanitizedGroup = groupName.replace(/\\/g, "_");
 
-				const sanitizedGroup = groupName.replace(/\\/g, "_");
+						code += `icacls "\\\\SRV04\\Firmy\\${currentPath}" /grant "${sanitizedGroup}:RX"\n`;
+					});
+				} else {
+					const groupName = `GS_Firmy_${currentPath}`;
+					const sanitizedGroup = groupName.replace(/\\/g, "_");
 
-				code += `icacls "\\\\SRV04\\Firmy\\${currentPath}" /grant "${sanitizedGroup}:RX"\n`;
+					code += `icacls "\\\\SRV04\\Firmy\\${currentPath}" /grant "${sanitizedGroup}:RX"\n`;
+				}
 			}
 		});
 	});
 
 	return code;
 }
+
 
 
 function grantAccessM(folders: string[], suffix: string) {
