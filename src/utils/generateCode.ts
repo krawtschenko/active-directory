@@ -224,11 +224,11 @@ function grantAccessRX(
 	.filter(Boolean);
 
 	const buildPaths = (path: string) => {
-		const parts = path.split("/").filter(Boolean);
+		const parts = path.split("\\").filter(Boolean);
 		const result: string[] = [];
 
 		for (let i = parts.length; i > 0; i--) {
-			result.push(parts.slice(0, i).join("/"));
+			result.push(parts.slice(0, i).join("\\"));
 		}
 
 		return result;
