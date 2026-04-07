@@ -1,11 +1,11 @@
 function createFolder(location: string, folders: string[]) {
-	if (!folders?.length) {
-		return "Wpisz nazwę folderu, aby wygenerować kod";
-	}
+  if (!folders?.length) {
+    return "Wpisz nazwę folderu, aby wygenerować kod";
+  }
 
-	const foldersList = folders.map((f) => `"${f}"`).join(", ");
+  const foldersList = folders.map((f) => `"${f}"`).join(", ");
 
-	return `$path = "\\\\SRV04\\Firmy\\${location}"
+  return `$path = "\\\\SRV04\\Firmy\\${location}"
 
 if (-Not (Test-Path $path)) {
     Write-Host "Location does not exist: $path" -ForegroundColor Red
@@ -31,40 +31,40 @@ foreach ($folder in $folders) {
 }
 
 function createGroup(
-	users: string[],
-	groups: string[],
-	prefix: string,
-	suffix: string,
-	kadry: boolean
+  users: string[],
+  groups: string[],
+  prefix: string,
+  suffix: string,
+  kadry: boolean,
 ) {
-	if (groups.length === 0) {
-		return "Wpisz nazwę grupy, aby wygenerować kod";
-	}
+  if (groups.length === 0) {
+    return "Wpisz nazwę grupy, aby wygenerować kod";
+  }
 
-	const path = kadry
-		? "OU=KadryIPlace,OU=Grupy,OU=Szwak,DC=szwak,DC=local"
-		: "OU=Grupy,OU=Szwak,DC=szwak,DC=local";
+  const path = kadry
+    ? "OU=KadryIPlace,OU=Grupy,OU=Szwak,DC=szwak,DC=local"
+    : "OU=Grupy,OU=Szwak,DC=szwak,DC=local";
 
-	const groupPrefix = kadry
-		? `GS_Firmy_KadryIPlace_${prefix ? `${prefix}_` : ""}`
-		: `GS_Firmy_${prefix ? `${prefix}_` : ""}`;
-	const groupNames = groups
-	.map(
-		(g) =>
-			`"${groupPrefix}${g.replace(/\\/g, "_")}${suffix ? `_${suffix}` : ""}"`
-	)
-	.join(", ");
-	const userNames =
-		users.length > 0 ? users.map((u) => `"${u}"`).join(", ") : "";
+  const groupPrefix = kadry
+    ? `GS_Firmy_Kadry_i_Place_${prefix ? `${prefix}_` : ""}`
+    : `GS_Firmy_${prefix ? `${prefix}_` : ""}`;
+  const groupNames = groups
+    .map(
+      (g) =>
+        `"${groupPrefix}${g.replace(/\\/g, "_")}${suffix ? `_${suffix}` : ""}"`,
+    )
+    .join(", ");
+  const userNames =
+    users.length > 0 ? users.map((u) => `"${u}"`).join(", ") : "";
 
-	return `$OUPath = "${path}"
+  return `$OUPath = "${path}"
 $Groups = @(${groupNames})
 ${
-		users.length > 0
-			? `$Users = @(${userNames})
+  users.length > 0
+    ? `$Users = @(${userNames})
 `
-			: ""
-	}
+    : ""
+}
 
 foreach ($GroupName in $Groups) {
     if (-not (Get-ADGroup -Filter {Name -eq $GroupName})) {
@@ -74,8 +74,8 @@ foreach ($GroupName in $Groups) {
         Write-Host "Group '$GroupName' already exists." -ForegroundColor Yellow
     }
     ${
-		users.length > 0
-			? `
+      users.length > 0
+        ? `
     if ($Users) {
         foreach ($UserName in $Users) {
             if (Get-ADUser -Filter {SamAccountName -eq $UserName}) {
@@ -86,28 +86,33 @@ foreach ($GroupName in $Groups) {
             }
         }
     }`
-			: ""
-	}
+        : ""
+    }
 }`;
 }
 
-function addUserToGroup(users: string[], groups: string[], prefix: string, suffix: string) {
-	if (users.length === 0 || groups.length === 0) {
-		return "Wpisz nazwę użytkownika i grupy, aby wygenerować kod";
-	}
+function addUserToGroup(
+  users: string[],
+  groups: string[],
+  prefix: string,
+  suffix: string,
+) {
+  if (users.length === 0 || groups.length === 0) {
+    return "Wpisz nazwę użytkownika i grupy, aby wygenerować kod";
+  }
 
-	const userNames = users.map((u) => `"${u}"`).join(", ");
-	const groupNames = groups
-	.map(
-		(g) =>
-			`"GS_Firmy_${prefix ? `${prefix}_` : ""}${g}${
-				suffix ? `_${suffix}` : ""
-			}"`
-	)
-	.join(", ")
-	.replace(/\\/g, "_");
+  const userNames = users.map((u) => `"${u}"`).join(", ");
+  const groupNames = groups
+    .map(
+      (g) =>
+        `"GS_Firmy_${prefix ? `${prefix}_` : ""}${g}${
+          suffix ? `_${suffix}` : ""
+        }"`,
+    )
+    .join(", ")
+    .replace(/\\/g, "_");
 
-	return `$Users = @(${userNames})
+  return `$Users = @(${userNames})
 $Groups = @(${groupNames})
 
 $ExistingGroups = @{}
@@ -207,120 +212,114 @@ foreach ($UserName in $Users) {
 // 	return code;
 // }
 
-function grantAccessRX(
-	folders: string[],
-	groups: string[],
-	suffix: string
-) {
-	if (folders.length === 0) {
-		return "Wpisz nazwę folderu, aby wygenerować kod";
-	}
+function grantAccessRX(folders: string[], groups: string[], suffix: string) {
+  if (folders.length === 0) {
+    return "Wpisz nazwę folderu, aby wygenerować kod";
+  }
 
-	let code = "";
+  let code = "";
 
-	const suffixes = suffix
-	.split(",")
-	.map(s => s.trim())
-	.filter(Boolean);
+  const suffixes = suffix
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 
-	const buildPaths = (path: string) => {
-		const parts = path.split("\\").filter(Boolean);
-		const result: string[] = [];
+  const buildPaths = (path: string) => {
+    const parts = path.split("\\").filter(Boolean);
+    const result: string[] = [];
 
-		for (let i = parts.length; i > 0; i--) {
-			result.push(parts.slice(0, i).join("\\"));
-		}
+    for (let i = parts.length; i > 0; i--) {
+      result.push(parts.slice(0, i).join("\\"));
+    }
 
-		return result;
-	};
+    return result;
+  };
 
-	folders.forEach((folder) => {
-		const paths = buildPaths(folder);
+  folders.forEach((folder) => {
+    const paths = buildPaths(folder);
 
-		paths.forEach((currentPath) => {
-			if (groups.length > 0) {
-				groups.forEach((group) => {
-					const sanitizedGroup = group.replace(/\\/g, "_");
-					code += `icacls "\\\\SRV04\\Firmy\\${currentPath}" /grant "GS_Firmy_${sanitizedGroup}:RX"\n`;
-				});
-			} else {
-				if (suffixes.length > 0) {
-					suffixes.forEach((suf) => {
-						const groupName = `GS_Firmy_${currentPath}_${suf}`;
-						const sanitizedGroup = groupName.replace(/\\/g, "_");
+    paths.forEach((currentPath) => {
+      if (groups.length > 0) {
+        groups.forEach((group) => {
+          const sanitizedGroup = group.replace(/\\/g, "_");
+          code += `icacls "\\\\SRV04\\Firmy\\${currentPath}" /grant "GS_Firmy_${sanitizedGroup}:RX"\n`;
+        });
+      } else {
+        if (suffixes.length > 0) {
+          suffixes.forEach((suf) => {
+            const groupName = `GS_Firmy_${currentPath}_${suf}`;
+            const sanitizedGroup = groupName.replace(/\\/g, "_");
 
-						code += `icacls "\\\\SRV04\\Firmy\\${currentPath}" /grant "${sanitizedGroup}:RX"\n`;
-					});
-				} else {
-					const groupName = `GS_Firmy_${currentPath}`;
-					const sanitizedGroup = groupName.replace(/\\/g, "_");
+            code += `icacls "\\\\SRV04\\Firmy\\${currentPath}" /grant "${sanitizedGroup}:RX"\n`;
+          });
+        } else {
+          const groupName = `GS_Firmy_${currentPath}`;
+          const sanitizedGroup = groupName.replace(/\\/g, "_");
 
-					code += `icacls "\\\\SRV04\\Firmy\\${currentPath}" /grant "${sanitizedGroup}:RX"\n`;
-				}
-			}
-		});
-	});
+          code += `icacls "\\\\SRV04\\Firmy\\${currentPath}" /grant "${sanitizedGroup}:RX"\n`;
+        }
+      }
+    });
+  });
 
-	return code;
+  return code;
 }
 
-
-
 function grantAccessM(folders: string[], suffix: string) {
-	if (folders.length === 0) {
-		return "Wpisz nazwę folderu, aby wygenerować kod";
-	}
+  if (folders.length === 0) {
+    return "Wpisz nazwę folderu, aby wygenerować kod";
+  }
 
-	let code = "";
+  let code = "";
 
-	folders.forEach((folder) => {
-		const sanitizedFolder = suffix ? `${folder}\\${suffix}` : `${folder}`;
-		const group = sanitizedFolder.replace(/\\/g, "_");
+  folders.forEach((folder) => {
+    const sanitizedFolder = suffix ? `${folder}\\${suffix}` : `${folder}`;
+    const group = sanitizedFolder.replace(/\\/g, "_");
 
-		code += `icacls "\\\\SRV04\\Firmy\\${sanitizedFolder}" /grant "GS_Firmy_${group}:(OI)(CI)(M)"\n`;
-	});
+    code += `icacls "\\\\SRV04\\Firmy\\${sanitizedFolder}" /grant "GS_Firmy_${group}:(OI)(CI)(M)"\n`;
+  });
 
-	return code;
+  return code;
 }
 
 function grantAccessSQL(users: string[], bases: string[]) {
-	if (users.length === 0 || bases.length === 0) {
-		return "Wpisz nazwę użytkownika i bazy, aby wygenerować kod";
-	} else {
-		let code = "";
+  if (users.length === 0 || bases.length === 0) {
+    return "Wpisz nazwę użytkownika i bazy, aby wygenerować kod";
+  } else {
+    let code = "";
 
-		users.forEach((u) => {
-			bases.forEach((b) => {
-				code += `USE ${b}\nCREATE USER [SZWAK\\${u}] FOR LOGIN [SZWAK\\${u}]\nALTER ROLE [db_owner] ADD MEMBER [SZWAK\\${u}]\n\n`;
-			});
-		});
+    users.forEach((u) => {
+      bases.forEach((b) => {
+        code += `USE ${b}\nCREATE USER [SZWAK\\${u}] FOR LOGIN [SZWAK\\${u}]\nALTER ROLE [db_owner] ADD MEMBER [SZWAK\\${u}]\n\n`;
+      });
+    });
 
-		return code;
-	}
+    return code;
+  }
 }
 
 export function generateCode(
-	action: string,
-	location: string,
-	users: string[],
-	groups: string[],
-	folders: string[],
-	suffix: string,
-	prefix: string,
-	kadry: boolean
+  action: string,
+  location: string,
+  users: string[],
+  groups: string[],
+  folders: string[],
+  suffix: string,
+  prefix: string,
+  kadry: boolean,
 ) {
-	switch (action) {
-		case "createFolder":
-			return createFolder(location, folders);
-		case "create":
-			return createGroup(users, groups, prefix, suffix, kadry);
-		case "add":
-			return addUserToGroup(users, groups, prefix, suffix);
-		case "rx":
-			return grantAccessRX(folders, groups, suffix);
-		case "m":
-			return grantAccessM(folders, suffix);
-		default:
-			return grantAccessSQL(users, groups);
-	}
+  switch (action) {
+    case "createFolder":
+      return createFolder(location, folders);
+    case "create":
+      return createGroup(users, groups, prefix, suffix, kadry);
+    case "add":
+      return addUserToGroup(users, groups, prefix, suffix);
+    case "rx":
+      return grantAccessRX(folders, groups, suffix);
+    case "m":
+      return grantAccessM(folders, suffix);
+    default:
+      return grantAccessSQL(users, groups);
+  }
 }
