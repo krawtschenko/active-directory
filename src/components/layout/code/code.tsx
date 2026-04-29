@@ -46,7 +46,7 @@ export const Code = (props: CodeProps) => {
         prefix,
         kadry
       ),
-    [action, location, users, groups, folders, prefix, suffix, kadry]
+    [action, location, usersArray, groupsArray, foldersArray, prefix, suffix, kadry]
   );
 
   async function copyToClipboard() {

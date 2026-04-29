@@ -8,7 +8,7 @@ import type { Action } from "../types";
 import type { Item } from "../components/radio/radio.tsx";
 
 // Опції визначені поза компонентом — стабільне посилання між рендерами
-const options: Item[] = [
+const options: Item<Action>[] = [
 	{ label: "Tworzenie folderu", value: "createFolder" },
 	{ label: "Tworzenie grupy", value: "create" },
 	{ label: "Dodanie do grupy", value: "add" },
@@ -28,7 +28,7 @@ export const App = () => {
 					className={styles.radio}
 					options={options}
 					defaultValue={formState.action}
-					onValueChange={(v) => setAction(v as Action)}
+					onValueChange={setAction}
 				/>
 			</div>
 
