@@ -1,28 +1,15 @@
 import styles from "./form.module.scss";
-import {Input} from "../../input/input";
-import {Checkbox} from "../../checkbox/checkbox.tsx";
-import {ChangeEvent} from "react";
+import { Input } from "../../input/input";
+import { Checkbox } from "../../checkbox/checkbox.tsx";
+import { ChangeEvent } from "react";
+import type { FormState } from "../../../app/useFormState";
 
-type PrimaryProps = {
-	action: string;
-	location: string;
-	users: string;
-	groups: string;
-	folders: string;
-	suffix: string;
-	prefix: string
-	kadry: boolean;
-	setAction: (action: string) => void;
-	setLocation: (location: string) => void;
-	setUsers: (users: string) => void;
-	setGroups: (groups: string) => void;
-	setFolders: (folders: string) => void;
-	setSuffix: (suffix: string) => void;
-	setPrefix: (prefix: string) => void;
-	setKadry: (kadry: boolean) => void;
+// Form отримує весь стан форми як єдиний об'єкт (без setAction — форма не змінює дію)
+type FormProps = {
+	state: Omit<FormState, "setAction">;
 };
 
-export const Form = (props: PrimaryProps) => {
+export const Form = ({ state }: FormProps) => {
 	const {
 		action,
 		location,
@@ -39,22 +26,21 @@ export const Form = (props: PrimaryProps) => {
 		setSuffix,
 		setPrefix,
 		setKadry,
-	} = props;
+	} = state;
 
+	// trim() навмисно прибраний — обрізання пробілів відбувається при сплітингу в Code
 	function handleInputChange(setter: (value: string) => void) {
 		return (event: ChangeEvent<HTMLInputElement>) => {
-			setter(event.target.value.trim());
+			setter(event.target.value);
 		};
 	}
 
-	const shouldShowLocationInput = ["createFolder"].includes(action);
+	const shouldShowLocationInput = action === "createFolder";
 	const shouldShowUserInput = ["create", "add", "sql"].includes(action);
 	const shouldShowFolderInput = ["rx", "m"].includes(action);
-	const shouldShowGroupAndSuffix = !["m", "sql", "createFolder"].includes(
-		action
-	);
-	const shouldShowSuffixInput = ["m"].includes(action);
-	const shouldShowPrefixInput = ["rx"].includes(action);
+	const shouldShowGroupAndSuffix = !["m", "sql", "createFolder"].includes(action);
+	const shouldShowSuffixInput = action === "m";
+	const shouldShowPrefixInput = action === "rx";
 	const shouldShowSQLInput = action === "sql";
 
 	return (
@@ -110,7 +96,7 @@ export const Form = (props: PrimaryProps) => {
 							onClickButton={() => setGroups("")}
 						/>
 
-						{!shouldShowPrefixInput &&
+						{!shouldShowPrefixInput && (
 							<Input
 								value={prefix}
 								onChange={handleInputChange(setPrefix)}
@@ -118,7 +104,7 @@ export const Form = (props: PrimaryProps) => {
 								label="Prefiks grupy"
 								onClickButton={() => setPrefix("")}
 							/>
-						}
+						)}
 
 						<Input
 							value={suffix}

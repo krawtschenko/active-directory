@@ -1,42 +1,25 @@
-import {useState} from "react";
-import {Code} from "../components/layout/code/code";
-import {Form} from "../components/layout/form/form.tsx";
+import { Code } from "../components/layout/code/code";
+import { Form } from "../components/layout/form/form.tsx";
 import styles from "./app.module.scss";
-import {Radio} from "../components/radio/radio.tsx";
-import {Animation} from "../components/animation/animation.tsx";
+import { Radio } from "../components/radio/radio.tsx";
+import { Animation } from "../components/animation/animation.tsx";
+import { useFormState } from "./useFormState";
+import type { Action } from "../types";
+import type { Item } from "../components/radio/radio.tsx";
+
+// Опції визначені поза компонентом — стабільне посилання між рендерами
+const options: Item[] = [
+	{ label: "Tworzenie folderu", value: "createFolder" },
+	{ label: "Tworzenie grupy", value: "create" },
+	{ label: "Dodanie do grupy", value: "add" },
+	{ label: "Nadanie Dostępu (:RX)", value: "rx" },
+	{ label: "Nadanie Dostępu (:M)", value: "m" },
+	{ label: "SQL", value: "sql" },
+];
 
 export const App = () => {
-	const [action, setAction] = useState("createFolder");
-
-	const [location, setLocation] = useState("");
-	const [users, setUsers] = useState("");
-	const [groups, setGroups] = useState("");
-	const [folders, setFolders] = useState("");
-	const [suffix, setSuffix] = useState("");
-	const [prefix, setPrefix] = useState("");
-
-	const [kadry, setKadry] = useState(false);
-
-	const options = [
-		{label: "Tworzenie folderu", value: "createFolder"},
-		{label: "Tworzenie grupy", value: "create"},
-		{label: "Dodanie do grupy", value: "add"},
-		{label: "Nadanie Dostępu (:RX)", value: "rx"},
-		{label: "Nadanie Dostępu (:M)", value: "m"},
-		{label: "SQL", value: "sql"},
-	];
-
-	function changeAction(value: string) {
-		setAction(value);
-
-		setLocation("");
-		setUsers("");
-		setGroups("");
-		setFolders("");
-		setSuffix("");
-		setPrefix("");
-		setKadry(false);
-	}
+	// setAction відокремлюємо, щоб не передавати його у Form (Form не змінює дію)
+	const { setAction, ...formState } = useFormState();
 
 	return (
 		<div className={styles.app}>
@@ -44,42 +27,25 @@ export const App = () => {
 				<Radio
 					className={styles.radio}
 					options={options}
-					defaultValue={action}
-					onValueChange={changeAction}
+					defaultValue={formState.action}
+					onValueChange={(v) => setAction(v as Action)}
 				/>
 			</div>
 
 			<div className={styles.block2}>
-				<Form
-					action={action}
-					location={location}
-					users={users}
-					groups={groups}
-					folders={folders}
-					suffix={suffix}
-					prefix={prefix}
-					kadry={kadry}
-					setAction={setAction}
-					setLocation={setLocation}
-					setUsers={setUsers}
-					setGroups={setGroups}
-					setFolders={setFolders}
-					setSuffix={setSuffix}
-					setPrefix={setPrefix}
-					setKadry={setKadry}
-				/>
+				<Form state={formState} />
 			</div>
 
 			<div className={styles.block3}>
 				<Code
-					action={action}
-					location={location}
-					users={users}
-					groups={groups}
-					folders={folders}
-					suffix={suffix}
-					prefix={prefix}
-					kadry={kadry}
+					action={formState.action}
+					location={formState.location}
+					users={formState.users}
+					groups={formState.groups}
+					folders={formState.folders}
+					suffix={formState.suffix}
+					prefix={formState.prefix}
+					kadry={formState.kadry}
 				/>
 			</div>
 

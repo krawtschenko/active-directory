@@ -1,3 +1,5 @@
+import type { Action } from "../types";
+
 function createFolder(location: string, folders: string[]) {
   if (!folders?.length) {
     return "Wpisz nazwę folderu, aby wygenerować kod";
@@ -136,82 +138,6 @@ foreach ($UserName in $Users) {
 }`;
 }
 
-// function grantAccessRX(folders: string[], groups: string[], suffix: string) {
-// 	if (folders.length === 0) {
-// 		return "Wpisz nazwę folderu, aby wygenerować kod";
-// 	}
-//
-// 	let code = "";
-//
-// 	if (groups.length > 0) {
-// 		folders.forEach((folder) => {
-// 			groups.forEach((group) => {
-// 				const sanitizedGroup = group?.replace(/\\/g, "_") ?? "";
-//
-// 				code += `icacls "\\\\SRV04\\Firmy\\${folder}" /grant "GS_Firmy_${sanitizedGroup}:RX"\n`;
-// 			});
-// 		});
-// 	} else {
-// 		folders.forEach((folder) => {
-// 			const group = suffix
-// 				? `GS_Firmy_${folder}_${suffix}`
-// 				: `GS_Firmy_${folder}`;
-//
-// 			const sanitizedGroup = group?.replace(/\\/g, "_") ?? "";
-//
-// 			code += `icacls "\\\\SRV04\\Firmy\\${folder}" /grant "${sanitizedGroup}:RX"\n`;
-// 		});
-// 	}
-//
-// 	return code;
-// }
-
-// function grantAccessRX(
-// 	folders: string[],
-// 	groups: string[],
-// 	suffix: string
-// ) {
-// 	if (folders.length === 0) {
-// 		return "Wpisz nazwę folderu, aby wygenerować kod";
-// 	}
-//
-// 	let code = "";
-//
-// 	const buildPaths = (path: string) => {
-// 		const parts = path.split("/").filter(Boolean);
-// 		const result: string[] = [];
-//
-// 		for (let i = parts.length; i > 0; i--) {
-// 			result.push(parts.slice(0, i).join("/"));
-// 		}
-//
-// 		return result;
-// 	};
-//
-// 	folders.forEach((folder) => {
-// 		const paths = buildPaths(folder);
-//
-// 		paths.forEach((currentPath) => {
-// 			if (groups.length > 0) {
-// 				groups.forEach((group) => {
-// 					const sanitizedGroup = group.replace(/\\/g, "_");
-// 					code += `icacls "\\\\SRV04\\Firmy\\${currentPath}" /grant "GS_Firmy_${sanitizedGroup}:RX"\n`;
-// 				});
-// 			} else {
-// 				const groupName = suffix
-// 					? `GS_Firmy_${currentPath}_${suffix}`
-// 					: `GS_Firmy_${currentPath}`;
-//
-// 				const sanitizedGroup = groupName.replace(/\\/g, "_");
-//
-// 				code += `icacls "\\\\SRV04\\Firmy\\${currentPath}" /grant "${sanitizedGroup}:RX"\n`;
-// 			}
-// 		});
-// 	});
-//
-// 	return code;
-// }
-
 function grantAccessRX(folders: string[], groups: string[], suffix: string) {
   if (folders.length === 0) {
     return "Wpisz nazwę folderu, aby wygenerować kod";
@@ -285,21 +211,21 @@ function grantAccessM(folders: string[], suffix: string) {
 function grantAccessSQL(users: string[], bases: string[]) {
   if (users.length === 0 || bases.length === 0) {
     return "Wpisz nazwę użytkownika i bazy, aby wygenerować kod";
-  } else {
-    let code = "";
-
-    users.forEach((u) => {
-      bases.forEach((b) => {
-        code += `USE ${b}\nCREATE USER [SZWAK\\${u}] FOR LOGIN [SZWAK\\${u}]\nALTER ROLE [db_owner] ADD MEMBER [SZWAK\\${u}]\n\n`;
-      });
-    });
-
-    return code;
   }
+
+  let code = "";
+
+  users.forEach((u) => {
+    bases.forEach((b) => {
+      code += `USE ${b}\nCREATE USER [SZWAK\\${u}] FOR LOGIN [SZWAK\\${u}]\nALTER ROLE [db_owner] ADD MEMBER [SZWAK\\${u}]\n\n`;
+    });
+  });
+
+  return code;
 }
 
 export function generateCode(
-  action: string,
+  action: Action,
   location: string,
   users: string[],
   groups: string[],

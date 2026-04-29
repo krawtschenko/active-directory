@@ -2,9 +2,10 @@ import { useMemo, useState } from "react";
 import styles from "./code.module.scss";
 import { IoCopyOutline } from "react-icons/io5";
 import { generateCode } from "../../../utils/generateCode";
+import type { Action } from "../../../types";
 
 type CodeProps = {
-  action: string;
+  action: Action;
   location: string;
   users: string;
   groups: string;
@@ -19,6 +20,7 @@ export const Code = (props: CodeProps) => {
 
   const [copyButtonText, setCopyButtonText] = useState("Copy");
 
+  // Перетворюємо рядки у масиви тут — Form зберігає сирий текст без обрізання
   const usersArray = useMemo(
     () => users.split(/[\s,]+/).filter(Boolean),
     [users]

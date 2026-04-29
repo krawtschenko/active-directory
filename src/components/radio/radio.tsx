@@ -16,30 +16,26 @@ export const Radio = (props: RadioProps) => {
 	const {options, className, ...rest} = props;
 
 	return (
-		<form>
-			<RadioGroup.Root
-				className={clsx(style.RadioGroupRoot, className)}
-				defaultValue={options[0].value}
-				{...rest}
-			>
-				{options.map(({label, value}) => {
-					return (
-						<div key={value} className={style.RadioGroupWrapper}>
-							<RadioGroup.Item
-								className={style.RadioGroupItem}
-								value={value}
-								id={value}
-							>
-								<RadioGroup.Indicator className={style.RadioGroupIndicator}/>
-							</RadioGroup.Item>
+		<RadioGroup.Root
+			className={clsx(style.RadioGroupRoot, className)}
+			defaultValue={options[0].value}
+			{...rest}
+		>
+			{options.map(({label, value}) => (
+				<div key={value} className={style.RadioGroupWrapper}>
+					<RadioGroup.Item
+						className={style.RadioGroupItem}
+						value={value}
+						id={value}
+					>
+						<RadioGroup.Indicator className={style.RadioGroupIndicator}/>
+					</RadioGroup.Item>
 
-							<label className={style.Label} htmlFor={value}>
-								{label}
-							</label>
-						</div>
-					);
-				})}
-			</RadioGroup.Root>
-		</form>
+					<label className={style.Label} htmlFor={value}>
+						{label}
+					</label>
+				</div>
+			))}
+		</RadioGroup.Root>
 	);
 };
