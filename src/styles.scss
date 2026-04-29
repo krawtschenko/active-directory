@@ -16,9 +16,46 @@ html {
 body {
   margin: 0;
   padding: 0;
+  min-height: 100vh;
+  font-family: "Nunito", "Segoe UI", Arial, sans-serif;
+  color: #1c2b3a;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(74, 144, 226, 0.12), transparent 28%),
+    radial-gradient(circle at 90% 0%, rgba(0, 188, 212, 0.1), transparent 24%),
+    linear-gradient(160deg, #eef4fb 0%, #f9fbff 60%, #f0f5fc 100%);
+  --main-color: #2f6fb2;
+  --main-color-strong: #1e5c9d;
+  --surface-color: #ffffff;
+  --surface-muted: #f6f9fd;
+  --surface-elevated: #ffffff;
+  --surface-header: linear-gradient(140deg, #ffffff 0%, #f5f9ff 100%);
+  --panel-bg: linear-gradient(170deg, #ffffff 0%, #f9fbff 100%);
+  --border-color: #d9e3ee;
+  --text-color: #1c2b3a;
+  --text-soft: #667c93;
+  --title-color: #10243e;
+  --shadow-soft: 0 10px 26px rgba(36, 74, 120, 0.08);
+  --shadow-header: 0 14px 36px rgba(36, 74, 120, 0.1);
+  transition: background 0.25s ease;
+}
 
-  font-family: "Nunito", sans-serif;
-
-  background-color: black;
-  --main-color: #006400;
+body[data-theme="dark"] {
+  color: #dce7f5;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(56, 142, 255, 0.22), transparent 32%),
+    radial-gradient(circle at 90% 0%, rgba(0, 188, 212, 0.16), transparent 26%),
+    linear-gradient(160deg, #0f1724 0%, #111c2b 60%, #0e1623 100%);
+  --main-color: #5ea2ea;
+  --main-color-strong: #7fb5ef;
+  --surface-color: #172332;
+  --surface-muted: #1a2738;
+  --surface-elevated: #1d2d42;
+  --surface-header: linear-gradient(140deg, #1d2d42 0%, #1b2a3d 100%);
+  --panel-bg: linear-gradient(170deg, #1b2a3d 0%, #182636 100%);
+  --border-color: #2e4460;
+  --text-color: #dce7f5;
+  --text-soft: #9ab0c8;
+  --title-color: #edf4ff;
+  --shadow-soft: 0 12px 26px rgba(0, 0, 0, 0.35);
+  --shadow-header: 0 16px 36px rgba(0, 0, 0, 0.4);
 }

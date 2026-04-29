@@ -1,18 +1,18 @@
 .primary {
-  padding: 10px;
+  padding: 0;
 
   .radio {
-    margin-top: 15px;
+    margin-top: 12px;
   }
 
   .inputs {
-    margin-top: 20px;
+    margin-top: 8px;
     display: flex;
     flex-direction: column;
-    row-gap: 10px;
+    row-gap: 12px;
   }
 
   .checkbox {
-    margin-top: 10px;
+    margin-top: 14px;
   }
 }

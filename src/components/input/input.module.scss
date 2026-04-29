@@ -2,30 +2,37 @@
   width: 100%;
 
   .label {
-    margin-left: 6px;
-    color: whitesmoke;
+    display: inline-block;
+    margin: 0 0 6px 2px;
+    color: var(--text-soft);
+    font-size: 13px;
+    font-weight: 600;
   }
 
   .inputWrapper {
     display: flex;
     align-items: center;
-    padding: 5px;
-    background-color: black;
-    border: 1px solid var(--main-color);
+    padding: 7px 10px;
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     transition: all 0.2s;
-    column-gap: 4px;
+    column-gap: 6px;
 
     .input {
       background-color: unset;
       border: none;
       width: 100%;
-      padding: 5px 0;
-      font-size: 16px;
-      color: whitesmoke;
+      padding: 4px 0;
+      font-size: 15px;
+      color: var(--text-color);
 
       &:focus {
         outline: none;
+      }
+
+      &::placeholder {
+        color: var(--text-soft);
       }
     }
 
@@ -34,22 +41,23 @@
 
       display: flex;
       align-items: center;
-      color: whitesmoke;
-      font-size: 20px;
+      color: var(--text-soft);
+      font-size: 18px;
       cursor: pointer;
 
-      &:active {
+      &:hover {
         color: var(--main-color);
       }
     }
 
     &:focus-within {
-      border-color: whitesmoke;
-      background-color: #1b1b1b;
+      border-color: var(--main-color-strong);
+      box-shadow: 0 0 0 4px rgba(47, 111, 178, 0.14);
     }
 
     &:hover {
-      background-color: #1b1b1b;
+      background-color: var(--surface-muted);
+      border-color: var(--main-color);
     }
   }
 }
