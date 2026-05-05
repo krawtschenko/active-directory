@@ -12,7 +12,7 @@ function getWindowStatePath() {
   return path.join(app.getPath("userData"), WINDOW_STATE_FILE);
 }
 
-function loadWindowSize() {
+function loadWindowState() {
   try {
     const stateFile = getWindowStatePath();
     if (!fs.existsSync(stateFile)) return DEFAULT_WINDOW_SIZE;
@@ -22,34 +22,32 @@ function loadWindowSize() {
       typeof savedState?.width === "number" &&
       typeof savedState?.height === "number"
     ) {
-      return {
-        width: savedState.width,
-        height: savedState.height,
-      };
+      return savedState;
     }
   } catch (error) {
-    console.error("Unable to read window size state:", error);
+    console.error("Unable to read window state:", error);
   }
 
   return DEFAULT_WINDOW_SIZE;
 }
 
-function saveWindowSize(mainWindow) {
+function saveWindowState(mainWindow) {
   try {
-    const { width, height } = mainWindow.getBounds();
+    const { width, height, x, y } = mainWindow.getBounds();
     const stateFile = getWindowStatePath();
-    fs.writeFileSync(stateFile, JSON.stringify({ width, height }, null, 2), "utf-8");
+    fs.writeFileSync(stateFile, JSON.stringify({ width, height, x, y }, null, 2), "utf-8");
   } catch (error) {
-    console.error("Unable to save window size state:", error);
+    console.error("Unable to save window state:", error);
   }
 }
 
 function createWindow() {
-  const { width, height } = loadWindowSize();
+  const { width, height, x, y } = loadWindowState();
 
   const mainWindow = new BrowserWindow({
     width,
     height,
+    ...(x !== undefined && y !== undefined ? { x, y } : {}),
     icon: path.join(__dirname, "build", "icon.ico"),
     webPreferences: {
       nodeIntegration: true,
@@ -63,8 +61,9 @@ function createWindow() {
   // Відключаємо меню
   mainWindow.removeMenu(); // Викликаємо метод як функцію
 
-  mainWindow.on("resize", () => saveWindowSize(mainWindow));
-  mainWindow.on("close", () => saveWindowSize(mainWindow));
+  mainWindow.on("resize", () => saveWindowState(mainWindow));
+  mainWindow.on("move", () => saveWindowState(mainWindow));
+  mainWindow.on("close", () => saveWindowState(mainWindow));
 }
 
 app.whenReady().then(createWindow);

@@ -4,21 +4,22 @@ function assertNever(value: never): never {
   throw new Error(`Unsupported action: ${String(value)}`);
 }
 
-function createFolder(location: string, folders: string[]) {
+function createFolder(folders: string[], location?: string) {
   if (!folders?.length) {
     return "Wpisz nazwę folderu, aby wygenerować kod";
   }
-  if (!location.trim()) {
-    return "Wpisz lokalizację folderu, aby wygenerować kod";
-  }
 
   const foldersList = folders.map((f) => `"${f}"`).join(", ");
-
-  return `$path = "\\\\SRV04\\Firmy\\${location}"
+  return `$path = "\\\\SRV04\\Firmy${location ? `\\${location}` : ""}"
 
 if (-Not (Test-Path $path)) {
-    Write-Host "Location does not exist: $path" -ForegroundColor Red
-    return
+    try {
+        New-Item -Path $path -ItemType Directory -Force -ErrorAction Stop | Out-Null
+        Write-Host "Created base path: $path" -ForegroundColor Cyan
+    } catch {
+        Write-Host "Failed to create base path: $path" -ForegroundColor Red
+        return
+    }
 }
 
 $folders = @(${foldersList})
@@ -252,7 +253,7 @@ export function generateCode(
 ) {
   switch (action) {
     case "createFolder":
-      return createFolder(location, folders);
+      return createFolder(folders, location);
     case "create":
       return createGroup(users, groups, prefix, suffix, kadry);
     case "add":
