@@ -31,7 +31,7 @@ export const Form = ({ state }: FormProps) => {
 	// trim() навмисно прибраний — обрізання пробілів відбувається при сплітингу в Code
 	function handleInputChange(setter: (value: string) => void) {
 		return (event: ChangeEvent<HTMLInputElement>) => {
-			setter(event.target.value);
+			setter(event.target.value.replace(/ {2,}/g, " "));
 		};
 	}
 

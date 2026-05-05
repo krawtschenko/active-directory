@@ -16,22 +16,23 @@ type CodeProps = {
 };
 
 export const Code = (props: CodeProps) => {
-  const { action, location, users, groups, folders, suffix, prefix, kadry } = props;
+  const { action, location, users, groups, folders, suffix, prefix, kadry } =
+    props;
 
   const [copyButtonText, setCopyButtonText] = useState("Copy");
 
   // Перетворюємо рядки у масиви тут — Form зберігає сирий текст без обрізання
   const usersArray = useMemo(
     () => users.split(/[\s,]+/).filter(Boolean),
-    [users]
+    [users],
   );
   const groupsArray = useMemo(
     () => groups.split(/[\s,]+/).filter(Boolean),
-    [groups]
+    [groups],
   );
   const foldersArray = useMemo(
     () => folders.split(/[\s,]+/).filter(Boolean),
-    [folders]
+    [folders],
   );
 
   const generatedCode = useMemo(
@@ -44,9 +45,18 @@ export const Code = (props: CodeProps) => {
         foldersArray,
         suffix,
         prefix,
-        kadry
+        kadry,
       ),
-    [action, location, usersArray, groupsArray, foldersArray, prefix, suffix, kadry]
+    [
+      action,
+      location,
+      usersArray,
+      groupsArray,
+      foldersArray,
+      prefix,
+      suffix,
+      kadry,
+    ],
   );
 
   async function copyToClipboard() {
