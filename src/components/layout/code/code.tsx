@@ -3,20 +3,14 @@ import styles from "./code.module.scss";
 import { IoCopyOutline, IoReload } from "react-icons/io5";
 import clsx from "clsx";
 import { generateCode } from "../../../utils/generateCode";
-import type { Action, PasswordOptions } from "../../../types";
+import type { FormState } from "../../../app/useFormState";
 
-type CodeProps = {
-  action: Action;
-  location: string;
-  users: string;
-  groups: string;
-  folders: string;
-  suffix: string;
-  prefix: string;
-  kadry: boolean;
-  password: string;
-  passwordOptions: PasswordOptions;
-};
+type CodeProps = Pick<
+  FormState,
+  "action" | "location" | "users" | "groups" | "folders" | "suffix" | "prefix" | "kadry" | "password" | "passwordOptions"
+>;
+
+const parseList = (input: string) => input.split(/[\s,]+/).filter(Boolean);
 
 export const Code = (props: CodeProps) => {
   const {
@@ -37,18 +31,9 @@ export const Code = (props: CodeProps) => {
   const isPasswordAction = action === "password";
 
   // Перетворюємо рядки у масиви тут — Form зберігає сирий текст без обрізання
-  const usersArray = useMemo(
-    () => users.split(/[\s,]+/).filter(Boolean),
-    [users],
-  );
-  const groupsArray = useMemo(
-    () => groups.split(/[\s,]+/).filter(Boolean),
-    [groups],
-  );
-  const foldersArray = useMemo(
-    () => folders.split(/[\s,]+/).filter(Boolean),
-    [folders],
-  );
+  const usersArray = useMemo(() => parseList(users), [users]);
+  const groupsArray = useMemo(() => parseList(groups), [groups]);
+  const foldersArray = useMemo(() => parseList(folders), [folders]);
 
   const generatedCode = useMemo(
     () =>

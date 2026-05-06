@@ -2,11 +2,32 @@ import styles from "./form.module.scss";
 import { Input } from "../../input/input";
 import { Checkbox } from "../../checkbox/checkbox.tsx";
 import { ChangeEvent } from "react";
+import type { Action } from "../../../types";
 import type { FormState } from "../../../app/useFormState";
 
-// Form отримує весь стан форми як єдиний об'єкт (без setAction — форма не змінює дію)
 type FormProps = {
 	state: Omit<FormState, "setAction">;
+};
+
+type VisibleFields = {
+	location?: boolean;
+	users?: boolean;
+	folders?: boolean;
+	groups?: boolean;
+	prefix?: boolean;
+	suffix?: boolean;
+	sqlBases?: boolean;
+	passwordLength?: boolean;
+};
+
+const FIELD_CONFIG: Record<Action, VisibleFields> = {
+	createFolder: { folders: true, location: true },
+	create:       { users: true, groups: true, prefix: true, suffix: true },
+	add:          { users: true, groups: true, prefix: true, suffix: true },
+	rx:           { folders: true, groups: true, suffix: true },
+	m:            { folders: true, suffix: true },
+	sql:          { users: true, sqlBases: true },
+	password:     { passwordLength: true },
 };
 
 export const Form = ({ state }: FormProps) => {
@@ -39,49 +60,12 @@ export const Form = ({ state }: FormProps) => {
 		};
 	}
 
-	const shouldShowLocationInput = action === "createFolder";
-	const shouldShowUserInput = ["create", "add", "sql"].includes(action);
-	const shouldShowFolderInput = ["rx", "m"].includes(action);
-	const shouldShowGroupAndSuffix = !["m", "sql", "createFolder", "password"].includes(action);
-	const shouldShowSuffixInput = action === "m";
-	const shouldShowPrefixInput = action === "rx";
-	const shouldShowSQLInput = action === "sql";
-	const shouldShowPasswordLength = action === "password";
+	const f = FIELD_CONFIG[action];
 
 	return (
 		<div className={styles.primary}>
 			<div className={styles.inputs}>
-				{shouldShowLocationInput && (
-					<>
-						<Input
-							value={folders}
-							onChange={handleInputChange(setFolders)}
-							placeholder="Folder"
-							label="Nazwa folderu"
-							onClickButton={() => setFolders("")}
-						/>
-
-						<Input
-							value={location}
-							onChange={handleInputChange(setLocation)}
-							placeholder="Lokalizacja"
-							label="Lokalizacja folderu"
-							onClickButton={() => setLocation("")}
-						/>
-					</>
-				)}
-
-				{shouldShowUserInput && (
-					<Input
-						value={users}
-						onChange={handleInputChange(setUsers)}
-						placeholder="Użytkownik"
-						label="Nazwa użytkownika"
-						onClickButton={() => setUsers("")}
-					/>
-				)}
-
-				{shouldShowFolderInput && (
+				{f.folders && (
 					<Input
 						value={folders}
 						onChange={handleInputChange(setFolders)}
@@ -91,37 +75,47 @@ export const Form = ({ state }: FormProps) => {
 					/>
 				)}
 
-				{shouldShowGroupAndSuffix && (
-					<>
-						<Input
-							value={groups}
-							onChange={handleInputChange(setGroups)}
-							placeholder="Grupa"
-							label="Nazwa grupy"
-							onClickButton={() => setGroups("")}
-						/>
-
-						{!shouldShowPrefixInput && (
-							<Input
-								value={prefix}
-								onChange={handleInputChange(setPrefix)}
-								placeholder="Prefiks"
-								label="Prefiks grupy"
-								onClickButton={() => setPrefix("")}
-							/>
-						)}
-
-						<Input
-							value={suffix}
-							onChange={handleInputChange(setSuffix)}
-							placeholder="Sufiks"
-							label="Sufiks grupy"
-							onClickButton={() => setSuffix("")}
-						/>
-					</>
+				{f.location && (
+					<Input
+						value={location}
+						onChange={handleInputChange(setLocation)}
+						placeholder="Lokalizacja"
+						label="Lokalizacja folderu"
+						onClickButton={() => setLocation("")}
+					/>
 				)}
 
-				{shouldShowSuffixInput && (
+				{f.users && (
+					<Input
+						value={users}
+						onChange={handleInputChange(setUsers)}
+						placeholder="Użytkownik"
+						label="Nazwa użytkownika"
+						onClickButton={() => setUsers("")}
+					/>
+				)}
+
+				{f.groups && (
+					<Input
+						value={groups}
+						onChange={handleInputChange(setGroups)}
+						placeholder="Grupa"
+						label="Nazwa grupy"
+						onClickButton={() => setGroups("")}
+					/>
+				)}
+
+				{f.prefix && (
+					<Input
+						value={prefix}
+						onChange={handleInputChange(setPrefix)}
+						placeholder="Prefiks"
+						label="Prefiks grupy"
+						onClickButton={() => setPrefix("")}
+					/>
+				)}
+
+				{f.suffix && (
 					<Input
 						value={suffix}
 						onChange={handleInputChange(setSuffix)}
@@ -131,7 +125,7 @@ export const Form = ({ state }: FormProps) => {
 					/>
 				)}
 
-				{shouldShowSQLInput && (
+				{f.sqlBases && (
 					<Input
 						value={groups}
 						onChange={handleInputChange(setGroups)}
@@ -141,7 +135,7 @@ export const Form = ({ state }: FormProps) => {
 					/>
 				)}
 
-				{shouldShowPasswordLength && (
+				{f.passwordLength && (
 					<Input
 						value={password}
 						onChange={handleInputChange(setPassword)}

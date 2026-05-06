@@ -30,7 +30,8 @@ const getSystemTheme = (): Theme => {
 
 export const App = () => {
 	// setAction відокремлюємо, щоб не передавати його у Form (Form не змінює дію)
-	const { setAction, ...formState } = useFormState();
+	const { setAction, setLocation, setUsers, setGroups, setFolders, setSuffix, setPrefix, setKadry, setPassword, setPasswordOptions, ...codeData } = useFormState();
+	const formState = { ...codeData, setLocation, setUsers, setGroups, setFolders, setSuffix, setPrefix, setKadry, setPassword, setPasswordOptions };
 	const [theme, setTheme] = useState<Theme>(getSystemTheme);
 
 	useEffect(() => {
@@ -76,18 +77,7 @@ export const App = () => {
 
 			<div className={styles.block3}>
 				<h2 className={styles.panelTitle}>Wynik</h2>
-				<Code
-					action={formState.action}
-					location={formState.location}
-					users={formState.users}
-					groups={formState.groups}
-					folders={formState.folders}
-					suffix={formState.suffix}
-					prefix={formState.prefix}
-					kadry={formState.kadry}
-					password={formState.password}
-					passwordOptions={formState.passwordOptions}
-				/>
+				<Code {...codeData} />
 			</div>
 		</div>
 	);

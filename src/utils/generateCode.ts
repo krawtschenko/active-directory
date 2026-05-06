@@ -1,16 +1,37 @@
 import type { Action, PasswordOptions } from "../types";
+import { SERVER_SHARE, SQL_DOMAIN, AD_OU_GROUPS, AD_OU_KADRY, VALIDATION } from "./constants";
 
 function assertNever(value: never): never {
   throw new Error(`Unsupported action: ${String(value)}`);
 }
 
-function createFolder(folders: string[], location?: string) {
-  if (!folders?.length) {
-    return "Wpisz nazwę folderu, aby wygenerować kod";
+function sanitize(s: string): string {
+  return s.replace(/\\/g, "_");
+}
+
+function buildGroupName(name: string, prefix?: string, suffix?: string, kadry = false): string {
+  const base = kadry ? "GS_Firmy_Kadry_i_Place" : "GS_Firmy";
+  return [base, prefix, name, suffix].filter(Boolean).map(sanitize).join("_");
+}
+
+function buildIcaclsCommand(path: string, groupName: string, permissions: string): string {
+  return `icacls "${SERVER_SHARE}\\${path}" /grant "${groupName}:${permissions}"`;
+}
+
+function buildPaths(path: string): string[] {
+  const parts = path.split("\\").filter(Boolean);
+  const result: string[] = [];
+  for (let i = parts.length; i > 0; i--) {
+    result.push(parts.slice(0, i).join("\\"));
   }
+  return result;
+}
+
+function createFolder(folders: string[], location?: string) {
+  if (!folders?.length) return VALIDATION.ENTER_FOLDER;
 
   const foldersList = folders.map((f) => `"${f}"`).join(", ");
-  return `$path = "\\\\SRV04\\Firmy${location ? `\\${location}` : ""}"
+  return `$path = "${SERVER_SHARE}${location ? `\\${location}` : ""}"
 
 if (-Not (Test-Path $path)) {
     try {
@@ -26,7 +47,7 @@ $folders = @(${foldersList})
 
 foreach ($folder in $folders) {
     $fullPath = "$path\\$folder"
-    
+
     if (Test-Path $fullPath) {
         Write-Host "Already exists: $folder" -ForegroundColor Yellow
     } else {
@@ -47,34 +68,15 @@ function createGroup(
   suffix: string,
   kadry: boolean,
 ) {
-  if (groups.length === 0) {
-    return "Wpisz nazwę grupy, aby wygenerować kod";
-  }
+  if (groups.length === 0) return VALIDATION.ENTER_GROUP;
 
-  const path = kadry
-    ? "OU=KadryIPlace,OU=Grupy,OU=Szwak,DC=szwak,DC=local"
-    : "OU=Grupy,OU=Szwak,DC=szwak,DC=local";
+  const ouPath = kadry ? AD_OU_KADRY : AD_OU_GROUPS;
+  const groupNames = groups.map((g) => `"${buildGroupName(g, prefix, suffix, kadry)}"`).join(", ");
+  const userNames = users.length > 0 ? users.map((u) => `"${u}"`).join(", ") : "";
 
-  const groupPrefix = kadry
-    ? `GS_Firmy_Kadry_i_Place_${prefix ? `${prefix}_` : ""}`
-    : `GS_Firmy_${prefix ? `${prefix}_` : ""}`;
-  const groupNames = groups
-    .map(
-      (g) =>
-        `"${groupPrefix}${g.replace(/\\/g, "_")}${suffix ? `_${suffix}` : ""}"`,
-    )
-    .join(", ");
-  const userNames =
-    users.length > 0 ? users.map((u) => `"${u}"`).join(", ") : "";
-
-  return `$OUPath = "${path}"
+  return `$OUPath = "${ouPath}"
 $Groups = @(${groupNames})
-${
-  users.length > 0
-    ? `$Users = @(${userNames})
-`
-    : ""
-}
+${users.length > 0 ? `$Users = @(${userNames})\n` : ""}
 
 foreach ($GroupName in $Groups) {
     if (-not (Get-ADGroup -Filter {Name -eq $GroupName})) {
@@ -107,20 +109,10 @@ function addUserToGroup(
   prefix: string,
   suffix: string,
 ) {
-  if (users.length === 0 || groups.length === 0) {
-    return "Wpisz nazwę użytkownika i grupy, aby wygenerować kod";
-  }
+  if (users.length === 0 || groups.length === 0) return VALIDATION.ENTER_USER_AND_GROUP;
 
   const userNames = users.map((u) => `"${u}"`).join(", ");
-  const groupNames = groups
-    .map(
-      (g) =>
-        `"GS_Firmy_${prefix ? `${prefix}_` : ""}${g}${
-          suffix ? `_${suffix}` : ""
-        }"`,
-    )
-    .join(", ")
-    .replace(/\\/g, "_");
+  const groupNames = groups.map((g) => `"${buildGroupName(g, prefix, suffix)}"`).join(", ");
 
   return `$Users = @(${userNames})
 $Groups = @(${groupNames})
@@ -147,98 +139,52 @@ foreach ($UserName in $Users) {
 }
 
 function grantAccessRX(folders: string[], groups: string[], suffix: string) {
-  if (folders.length === 0) {
-    return "Wpisz nazwę folderu, aby wygenerować kod";
-  }
+  if (folders.length === 0) return VALIDATION.ENTER_FOLDER;
 
   const commands = new Set<string>();
+  const suffixes = suffix.split(",").map((s) => s.trim()).filter(Boolean);
 
-  const suffixes = suffix
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  const buildPaths = (path: string) => {
-    const parts = path.split("\\").filter(Boolean);
-    const result: string[] = [];
-
-    for (let i = parts.length; i > 0; i--) {
-      result.push(parts.slice(0, i).join("\\"));
-    }
-
-    return result;
+  const getGroupNames = (currentPath: string): string[] => {
+    if (groups.length > 0) return groups.map((g) => buildGroupName(g));
+    if (suffixes.length > 0) return suffixes.map((suf) => buildGroupName(currentPath, undefined, suf));
+    return [buildGroupName(currentPath)];
   };
 
-  folders.forEach((folder) => {
-    const paths = buildPaths(folder);
-
-    paths.forEach((currentPath) => {
-      if (groups.length > 0) {
-        groups.forEach((group) => {
-          const sanitizedGroup = group.replace(/\\/g, "_");
-          commands.add(
-            `icacls "\\\\SRV04\\Firmy\\${currentPath}" /grant "GS_Firmy_${sanitizedGroup}:RX"`,
-          );
-        });
-      } else {
-        if (suffixes.length > 0) {
-          suffixes.forEach((suf) => {
-            const groupName = `GS_Firmy_${currentPath}_${suf}`;
-            const sanitizedGroup = groupName.replace(/\\/g, "_");
-
-            commands.add(
-              `icacls "\\\\SRV04\\Firmy\\${currentPath}" /grant "${sanitizedGroup}:RX"`,
-            );
-          });
-        } else {
-          const groupName = `GS_Firmy_${currentPath}`;
-          const sanitizedGroup = groupName.replace(/\\/g, "_");
-
-          commands.add(
-            `icacls "\\\\SRV04\\Firmy\\${currentPath}" /grant "${sanitizedGroup}:RX"`,
-          );
-        }
+  for (const folder of folders) {
+    for (const currentPath of buildPaths(folder)) {
+      for (const groupName of getGroupNames(currentPath)) {
+        commands.add(buildIcaclsCommand(currentPath, groupName, "RX"));
       }
-    });
-  });
+    }
+  }
 
-  return `${Array.from(commands).join("\n")}\n`;
+  return Array.from(commands).join("\n") + "\n";
 }
 
 function grantAccessM(folders: string[], suffix: string) {
-  if (folders.length === 0) {
-    return "Wpisz nazwę folderu, aby wygenerować kod";
-  }
+  if (folders.length === 0) return VALIDATION.ENTER_FOLDER;
 
-  let code = "";
-
-  folders.forEach((folder) => {
-    const sanitizedFolder = suffix ? `${folder}\\${suffix}` : `${folder}`;
-    const group = sanitizedFolder.replace(/\\/g, "_");
-
-    code += `icacls "\\\\SRV04\\Firmy\\${sanitizedFolder}" /grant "GS_Firmy_${group}:(OI)(CI)(M)"\n`;
-  });
-
-  return code;
+  return folders
+    .map((folder) => {
+      const path = suffix ? `${folder}\\${suffix}` : folder;
+      return buildIcaclsCommand(path, buildGroupName(path), "(OI)(CI)(M)");
+    })
+    .join("\n") + "\n";
 }
 
 function grantAccessSQL(users: string[], bases: string[]) {
-  if (users.length === 0 || bases.length === 0) {
-    return "Wpisz nazwę użytkownika i bazy, aby wygenerować kod";
-  }
+  if (users.length === 0 || bases.length === 0) return VALIDATION.ENTER_USER_AND_BASE;
 
-  const escapeSqlBracketedIdentifier = (value: string) => value.replace(/]/g, "]]");
-  let code = "";
+  const escape = (value: string) => value.replace(/]/g, "]]");
 
-  users.forEach((u) => {
-    bases.forEach((b) => {
-      const safeBase = escapeSqlBracketedIdentifier(b);
-      const safeUser = escapeSqlBracketedIdentifier(u);
-      code += `USE [${safeBase}]\nCREATE USER [SZWAK\\${safeUser}] FOR LOGIN [SZWAK\\${safeUser}]\nALTER ROLE [db_owner] ADD MEMBER [SZWAK\\${safeUser}]\n\n`;
-    });
-  });
-
-  return code;
+  return users
+    .flatMap((u) =>
+      bases.map(
+        (b) =>
+          `USE [${escape(b)}]\nCREATE USER [${SQL_DOMAIN}\\${escape(u)}] FOR LOGIN [${SQL_DOMAIN}\\${escape(u)}]\nALTER ROLE [db_owner] ADD MEMBER [${SQL_DOMAIN}\\${escape(u)}]`,
+      ),
+    )
+    .join("\n\n") + "\n\n";
 }
 
 function generatePassword(length: number, options: PasswordOptions): string {
@@ -256,29 +202,29 @@ function generatePassword(length: number, options: PasswordOptions): string {
 
   const safeLength = Math.max(8, Math.min(128, length));
 
-  // Guaranteed one char from each enabled category
-  const requiredSets = [lowerSet, upperSet, digitsSet, specialSet].filter(Boolean);
-  const requiredBytes = new Uint32Array(requiredSets.length);
-  crypto.getRandomValues(requiredBytes);
-  const required = requiredSets.map((set, i) => set[requiredBytes[i] % set.length]);
+  try {
+    const requiredSets = [lowerSet, upperSet, digitsSet, specialSet].filter(Boolean);
+    const requiredBytes = new Uint32Array(requiredSets.length);
+    crypto.getRandomValues(requiredBytes);
+    const required = requiredSets.map((set, i) => set[requiredBytes[i] % set.length]);
 
-  // Fill the password array
-  const bytes = new Uint32Array(safeLength);
-  crypto.getRandomValues(bytes);
-  const password = Array.from(bytes, (x) => charset[x % charset.length]);
+    const bytes = new Uint32Array(safeLength);
+    crypto.getRandomValues(bytes);
+    const password = Array.from(bytes, (x) => charset[x % charset.length]);
 
-  // Place required chars in first positions
-  required.forEach((char, i) => { password[i] = char; });
+    required.forEach((char, i) => { password[i] = char; });
 
-  // Fisher-Yates shuffle
-  const shuffleBytes = new Uint32Array(safeLength);
-  crypto.getRandomValues(shuffleBytes);
-  for (let i = safeLength - 1; i > 0; i--) {
-    const j = shuffleBytes[i] % (i + 1);
-    [password[i], password[j]] = [password[j], password[i]];
+    const shuffleBytes = new Uint32Array(safeLength);
+    crypto.getRandomValues(shuffleBytes);
+    for (let i = safeLength - 1; i > 0; i--) {
+      const j = shuffleBytes[i] % (i + 1);
+      [password[i], password[j]] = [password[j], password[i]];
+    }
+
+    return password.join("");
+  } catch {
+    return "";
   }
-
-  return password.join("");
 }
 
 export function generateCode(
