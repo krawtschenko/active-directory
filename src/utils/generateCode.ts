@@ -241,6 +241,37 @@ function grantAccessSQL(users: string[], bases: string[]) {
   return code;
 }
 
+function generatePassword(length: number): string {
+  const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const lower = "abcdefghijklmnopqrstuvwxyz";
+  const digits = "0123456789";
+  const special = "!@#$%^&*()-_=+[]{}|;:,.<>?";
+  const all = upper + lower + digits + special;
+
+  const safeLength = Math.max(8, Math.min(128, length));
+  const bytes = new Uint32Array(safeLength);
+  crypto.getRandomValues(bytes);
+
+  const password = Array.from(bytes, (x) => all[x % all.length]);
+
+  // Guaranteed one char from each category in first 4 positions
+  const required = [
+    upper[bytes[0] % upper.length],
+    lower[bytes[1] % lower.length],
+    digits[bytes[2] % digits.length],
+    special[bytes[3] % special.length],
+  ];
+  required.forEach((char, i) => { password[i] = char; });
+
+  // Fisher-Yates shuffle
+  for (let i = safeLength - 1; i > 0; i--) {
+    const j = bytes[i] % (i + 1);
+    [password[i], password[j]] = [password[j], password[i]];
+  }
+
+  return password.join("");
+}
+
 export function generateCode(
   action: Action,
   location: string,
@@ -250,6 +281,7 @@ export function generateCode(
   suffix: string,
   prefix: string,
   kadry: boolean,
+  password: string,
 ) {
   switch (action) {
     case "createFolder":
@@ -264,6 +296,8 @@ export function generateCode(
       return grantAccessM(folders, suffix);
     case "sql":
       return grantAccessSQL(users, groups);
+    case "password":
+      return generatePassword(parseInt(password) || 14);
     default:
       return assertNever(action);
   }

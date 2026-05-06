@@ -15,6 +15,7 @@ const options: Item<Action>[] = [
 	{ label: "Nadanie Dostępu (:RX)", value: "rx" },
 	{ label: "Nadanie Dostępu (:M)", value: "m" },
 	{ label: "SQL", value: "sql" },
+	{ label: "Generator haseł", value: "password" },
 ];
 
 type Theme = "light" | "dark";
@@ -84,6 +85,7 @@ export const App = () => {
 					suffix={formState.suffix}
 					prefix={formState.prefix}
 					kadry={formState.kadry}
+					password={formState.password}
 				/>
 			</div>
 		</div>

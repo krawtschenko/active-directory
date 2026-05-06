@@ -27,6 +27,11 @@
         text-transform: uppercase;
       }
 
+      .headerButtons {
+        display: flex;
+        gap: 8px;
+      }
+
       button {
         display: flex;
         align-items: center;

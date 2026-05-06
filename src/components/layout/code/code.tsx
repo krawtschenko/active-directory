@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import styles from "./code.module.scss";
-import { IoCopyOutline } from "react-icons/io5";
+import { IoCopyOutline, IoReload } from "react-icons/io5";
 import { generateCode } from "../../../utils/generateCode";
 import type { Action } from "../../../types";
 
@@ -13,13 +13,25 @@ type CodeProps = {
   suffix: string;
   prefix: string;
   kadry: boolean;
+  password: string;
 };
 
 export const Code = (props: CodeProps) => {
-  const { action, location, users, groups, folders, suffix, prefix, kadry } =
-    props;
+  const {
+    action,
+    location,
+    users,
+    groups,
+    folders,
+    suffix,
+    prefix,
+    kadry,
+    password,
+  } = props;
 
   const [copyButtonText, setCopyButtonText] = useState("Copy");
+  const [nonce, setNonce] = useState(0);
+  const isPasswordAction = action === "password";
 
   // Перетворюємо рядки у масиви тут — Form зберігає сирий текст без обрізання
   const usersArray = useMemo(
@@ -46,7 +58,10 @@ export const Code = (props: CodeProps) => {
         suffix,
         prefix,
         kadry,
+        password,
       ),
+    // nonce forces recomputation when Regenerate is clicked (password action only)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       action,
       location,
@@ -56,6 +71,8 @@ export const Code = (props: CodeProps) => {
       prefix,
       suffix,
       kadry,
+      password,
+      nonce,
     ],
   );
 
@@ -74,12 +91,26 @@ export const Code = (props: CodeProps) => {
     <div className={styles.codeWrapper}>
       <div className={styles.codeContainer}>
         <header className={styles.codeHeader}>
-          <span>{action === "sql" ? "SQL" : "Powershell"}</span>
+          <span>
+            {action === "sql"
+              ? "SQL"
+              : isPasswordAction
+                ? "Password"
+                : "Powershell"}
+          </span>
 
-          <button onClick={copyToClipboard}>
-            <IoCopyOutline />
-            <span>{copyButtonText}</span>
-          </button>
+          <div className={styles.headerButtons}>
+            {isPasswordAction && (
+              <button onClick={() => setNonce((n) => n + 1)}>
+                <IoReload />
+                <span>Regenerate</span>
+              </button>
+            )}
+            <button onClick={copyToClipboard}>
+              <IoCopyOutline />
+              <span>{copyButtonText}</span>
+            </button>
+          </div>
         </header>
 
         <pre className={styles.codeBlock}>

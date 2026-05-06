@@ -11,6 +11,7 @@ export type FormState = {
   suffix: string;
   prefix: string;
   kadry: boolean;
+  password: string;
   setAction: (value: Action) => void;
   setLocation: (value: string) => void;
   setUsers: (value: string) => void;
@@ -19,13 +20,14 @@ export type FormState = {
   setSuffix: (value: string) => void;
   setPrefix: (value: string) => void;
   setKadry: (value: boolean) => void;
+  setPassword: (value: string) => void;
 };
 
-type State = Pick<FormState, "action" | "location" | "users" | "groups" | "folders" | "suffix" | "prefix" | "kadry">;
+type State = Pick<FormState, "action" | "location" | "users" | "groups" | "folders" | "suffix" | "prefix" | "kadry" | "password">;
 
 type FormAction =
   | { type: "SET_ACTION"; payload: Action }
-  | { type: "SET_STRING_FIELD"; field: "location" | "users" | "groups" | "folders" | "suffix" | "prefix"; value: string }
+  | { type: "SET_STRING_FIELD"; field: "location" | "users" | "groups" | "folders" | "suffix" | "prefix" | "password"; value: string }
   | { type: "SET_KADRY"; value: boolean };
 
 const initialState: State = {
@@ -37,6 +39,7 @@ const initialState: State = {
   suffix: "",
   prefix: "",
   kadry: false,
+  password: "",
 };
 
 function reducer(state: State, action: FormAction): State {
@@ -64,5 +67,6 @@ export function useFormState(): FormState {
     setSuffix: (value) => dispatch({ type: "SET_STRING_FIELD", field: "suffix", value }),
     setPrefix: (value) => dispatch({ type: "SET_STRING_FIELD", field: "prefix", value }),
     setKadry: (value) => dispatch({ type: "SET_KADRY", value }),
+    setPassword: (value) => dispatch({ type: "SET_STRING_FIELD", field: "password", value }),
   };
 }

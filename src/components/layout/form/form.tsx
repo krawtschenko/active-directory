@@ -19,6 +19,7 @@ export const Form = ({ state }: FormProps) => {
 		suffix,
 		prefix,
 		kadry,
+		password,
 		setLocation,
 		setUsers,
 		setGroups,
@@ -26,6 +27,7 @@ export const Form = ({ state }: FormProps) => {
 		setSuffix,
 		setPrefix,
 		setKadry,
+		setPassword,
 	} = state;
 
 	// trim() навмисно прибраний — обрізання пробілів відбувається при сплітингу в Code
@@ -38,10 +40,11 @@ export const Form = ({ state }: FormProps) => {
 	const shouldShowLocationInput = action === "createFolder";
 	const shouldShowUserInput = ["create", "add", "sql"].includes(action);
 	const shouldShowFolderInput = ["rx", "m"].includes(action);
-	const shouldShowGroupAndSuffix = !["m", "sql", "createFolder"].includes(action);
+	const shouldShowGroupAndSuffix = !["m", "sql", "createFolder", "password"].includes(action);
 	const shouldShowSuffixInput = action === "m";
 	const shouldShowPrefixInput = action === "rx";
 	const shouldShowSQLInput = action === "sql";
+	const shouldShowPasswordLength = action === "password";
 
 	return (
 		<div className={styles.primary}>
@@ -133,6 +136,16 @@ export const Form = ({ state }: FormProps) => {
 						placeholder="Baza"
 						label="Nazwa bazy SQL"
 						onClickButton={() => setGroups("")}
+					/>
+				)}
+
+				{shouldShowPasswordLength && (
+					<Input
+						value={password}
+						onChange={handleInputChange(setPassword)}
+						placeholder="14"
+						label="Długość hasła"
+						onClickButton={() => setPassword("")}
 					/>
 				)}
 			</div>
