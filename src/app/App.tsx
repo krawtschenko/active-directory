@@ -86,6 +86,7 @@ export const App = () => {
 					prefix={formState.prefix}
 					kadry={formState.kadry}
 					password={formState.password}
+					passwordOptions={formState.passwordOptions}
 				/>
 			</div>
 		</div>

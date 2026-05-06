@@ -1,5 +1,5 @@
 import { useReducer } from "react";
-import type { Action } from "../types";
+import type { Action, PasswordOptions } from "../types";
 
 // Весь стан форми разом із сеттерами — передається як єдиний об'єкт у Form
 export type FormState = {
@@ -12,6 +12,7 @@ export type FormState = {
   prefix: string;
   kadry: boolean;
   password: string;
+  passwordOptions: PasswordOptions;
   setAction: (value: Action) => void;
   setLocation: (value: string) => void;
   setUsers: (value: string) => void;
@@ -21,14 +22,16 @@ export type FormState = {
   setPrefix: (value: string) => void;
   setKadry: (value: boolean) => void;
   setPassword: (value: string) => void;
+  setPasswordOptions: (value: Partial<PasswordOptions>) => void;
 };
 
-type State = Pick<FormState, "action" | "location" | "users" | "groups" | "folders" | "suffix" | "prefix" | "kadry" | "password">;
+type State = Pick<FormState, "action" | "location" | "users" | "groups" | "folders" | "suffix" | "prefix" | "kadry" | "password" | "passwordOptions">;
 
 type FormAction =
   | { type: "SET_ACTION"; payload: Action }
   | { type: "SET_STRING_FIELD"; field: "location" | "users" | "groups" | "folders" | "suffix" | "prefix" | "password"; value: string }
-  | { type: "SET_KADRY"; value: boolean };
+  | { type: "SET_KADRY"; value: boolean }
+  | { type: "SET_PASSWORD_OPTIONS"; value: Partial<PasswordOptions> };
 
 const initialState: State = {
   action: "createFolder",
@@ -40,6 +43,12 @@ const initialState: State = {
   prefix: "",
   kadry: false,
   password: "",
+  passwordOptions: {
+    uppercase: true,
+    numbers: true,
+    symbols: true,
+    noAmbiguous: true,
+  },
 };
 
 function reducer(state: State, action: FormAction): State {
@@ -51,6 +60,8 @@ function reducer(state: State, action: FormAction): State {
       return { ...state, [action.field]: action.value };
     case "SET_KADRY":
       return { ...state, kadry: action.value };
+    case "SET_PASSWORD_OPTIONS":
+      return { ...state, passwordOptions: { ...state.passwordOptions, ...action.value } };
   }
 }
 
@@ -68,5 +79,6 @@ export function useFormState(): FormState {
     setPrefix: (value) => dispatch({ type: "SET_STRING_FIELD", field: "prefix", value }),
     setKadry: (value) => dispatch({ type: "SET_KADRY", value }),
     setPassword: (value) => dispatch({ type: "SET_STRING_FIELD", field: "password", value }),
+    setPasswordOptions: (value) => dispatch({ type: "SET_PASSWORD_OPTIONS", value }),
   };
 }

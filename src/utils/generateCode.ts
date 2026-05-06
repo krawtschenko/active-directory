@@ -1,4 +1,4 @@
-import type { Action } from "../types";
+import type { Action, PasswordOptions } from "../types";
 
 function assertNever(value: never): never {
   throw new Error(`Unsupported action: ${String(value)}`);
@@ -241,31 +241,40 @@ function grantAccessSQL(users: string[], bases: string[]) {
   return code;
 }
 
-function generatePassword(length: number): string {
-  const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const lower = "abcdefghijklmnopqrstuvwxyz";
-  const digits = "0123456789";
-  const special = "!@#$%^&*()-_=+[]{}|;:,.<>?";
-  const all = upper + lower + digits + special;
+function generatePassword(length: number, options: PasswordOptions): string {
+  const ambiguous = "Il";
+  const filterAmbiguous = (s: string) =>
+    options.noAmbiguous ? s.split("").filter((c) => !ambiguous.includes(c)).join("") : s;
+
+  const lowerSet = filterAmbiguous("abcdefghijklmnopqrstuvwxyz");
+  const upperSet = options.uppercase ? filterAmbiguous("ABCDEFGHIJKLMNOPQRSTUVWXYZ") : "";
+  const digitsSet = options.numbers ? "0123456789" : "";
+  const specialSet = options.symbols ? "!@#$%^&*()-_=+[]{}|;:,.<>?" : "";
+
+  const charset = lowerSet + upperSet + digitsSet + specialSet;
+  if (!charset) return "";
 
   const safeLength = Math.max(8, Math.min(128, length));
+
+  // Guaranteed one char from each enabled category
+  const requiredSets = [lowerSet, upperSet, digitsSet, specialSet].filter(Boolean);
+  const requiredBytes = new Uint32Array(requiredSets.length);
+  crypto.getRandomValues(requiredBytes);
+  const required = requiredSets.map((set, i) => set[requiredBytes[i] % set.length]);
+
+  // Fill the password array
   const bytes = new Uint32Array(safeLength);
   crypto.getRandomValues(bytes);
+  const password = Array.from(bytes, (x) => charset[x % charset.length]);
 
-  const password = Array.from(bytes, (x) => all[x % all.length]);
-
-  // Guaranteed one char from each category in first 4 positions
-  const required = [
-    upper[bytes[0] % upper.length],
-    lower[bytes[1] % lower.length],
-    digits[bytes[2] % digits.length],
-    special[bytes[3] % special.length],
-  ];
+  // Place required chars in first positions
   required.forEach((char, i) => { password[i] = char; });
 
   // Fisher-Yates shuffle
+  const shuffleBytes = new Uint32Array(safeLength);
+  crypto.getRandomValues(shuffleBytes);
   for (let i = safeLength - 1; i > 0; i--) {
-    const j = bytes[i] % (i + 1);
+    const j = shuffleBytes[i] % (i + 1);
     [password[i], password[j]] = [password[j], password[i]];
   }
 
@@ -282,6 +291,7 @@ export function generateCode(
   prefix: string,
   kadry: boolean,
   password: string,
+  passwordOptions: PasswordOptions,
 ) {
   switch (action) {
     case "createFolder":
@@ -297,7 +307,7 @@ export function generateCode(
     case "sql":
       return grantAccessSQL(users, groups);
     case "password":
-      return generatePassword(parseInt(password) || 14);
+      return generatePassword(parseInt(password) || 14, passwordOptions);
     default:
       return assertNever(action);
   }

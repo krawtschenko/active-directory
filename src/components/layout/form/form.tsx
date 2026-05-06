@@ -20,6 +20,7 @@ export const Form = ({ state }: FormProps) => {
 		prefix,
 		kadry,
 		password,
+		passwordOptions,
 		setLocation,
 		setUsers,
 		setGroups,
@@ -28,6 +29,7 @@ export const Form = ({ state }: FormProps) => {
 		setPrefix,
 		setKadry,
 		setPassword,
+		setPasswordOptions,
 	} = state;
 
 	// trim() навмисно прибраний — обрізання пробілів відбувається при сплітингу в Code
@@ -149,6 +151,31 @@ export const Form = ({ state }: FormProps) => {
 					/>
 				)}
 			</div>
+
+			{action === "password" && (
+				<div className={styles.passwordOptions}>
+					<Checkbox
+						checked={passwordOptions.uppercase}
+						onCheckedChange={(v) => setPasswordOptions({ uppercase: !!v })}
+						label="Wielkie litery"
+					/>
+					<Checkbox
+						checked={passwordOptions.numbers}
+						onCheckedChange={(v) => setPasswordOptions({ numbers: !!v })}
+						label="Cyfry"
+					/>
+					<Checkbox
+						checked={passwordOptions.symbols}
+						onCheckedChange={(v) => setPasswordOptions({ symbols: !!v })}
+						label="Symbole"
+					/>
+					<Checkbox
+						checked={passwordOptions.noAmbiguous}
+						onCheckedChange={(v) => setPasswordOptions({ noAmbiguous: !!v })}
+						label="Bez I-l"
+					/>
+				</div>
+			)}
 
 			{action === "create" && (
 				<Checkbox

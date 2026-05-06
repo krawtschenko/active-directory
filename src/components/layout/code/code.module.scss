@@ -82,6 +82,98 @@
         font-family: "Courier Prime", monospace;
       }
     }
+
+    .codeBlockPassword {
+      text-align: center;
+
+      code {
+        font-size: 22px;
+        letter-spacing: 0.08em;
+      }
+    }
+
+    .charUpper {
+      color: #4ade80;
+    }
+
+    .charDigit {
+      color: #fb923c;
+    }
+  }
+
+  .historyContainer {
+    margin-top: 8px;
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+
+    .historyTitle {
+      display: block;
+      padding: 8px 14px;
+      color: var(--text-soft);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--surface-header);
+    }
+
+    .historyItems {
+      max-height: 185px;
+      overflow-y: auto;
+
+      &::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: #7892ae;
+        border-radius: 4px;
+      }
+
+      &::-webkit-scrollbar-thumb:hover {
+        background-color: #6280a0;
+      }
+    }
+
+    .historyItem {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border-color);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      code {
+        font-family: "Courier Prime", monospace;
+        font-size: 14px;
+        color: var(--text-soft);
+      }
+
+      .historyItemButton {
+        display: flex;
+        align-items: center;
+        padding: 4px 6px;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        color: var(--text-soft);
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+
+        &:hover {
+          border-color: var(--border-color);
+          color: var(--main-color-strong);
+        }
+      }
+    }
   }
 
   @media (max-width: 1099px) {

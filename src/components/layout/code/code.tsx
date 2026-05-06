@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import styles from "./code.module.scss";
 import { IoCopyOutline, IoReload } from "react-icons/io5";
+import clsx from "clsx";
 import { generateCode } from "../../../utils/generateCode";
-import type { Action } from "../../../types";
+import type { Action, PasswordOptions } from "../../../types";
 
 type CodeProps = {
   action: Action;
@@ -14,6 +15,7 @@ type CodeProps = {
   prefix: string;
   kadry: boolean;
   password: string;
+  passwordOptions: PasswordOptions;
 };
 
 export const Code = (props: CodeProps) => {
@@ -27,9 +29,10 @@ export const Code = (props: CodeProps) => {
     prefix,
     kadry,
     password,
+    passwordOptions,
   } = props;
 
-  const [copyButtonText, setCopyButtonText] = useState("Copy");
+  const [copyButtonText, setCopyButtonText] = useState("Kopiuj");
   const [nonce, setNonce] = useState(0);
   const isPasswordAction = action === "password";
 
@@ -59,9 +62,8 @@ export const Code = (props: CodeProps) => {
         prefix,
         kadry,
         password,
+        passwordOptions,
       ),
-    // nonce forces recomputation when Regenerate is clicked (password action only)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       action,
       location,
@@ -72,18 +74,37 @@ export const Code = (props: CodeProps) => {
       suffix,
       kadry,
       password,
+      passwordOptions,
       nonce,
     ],
   );
+
+  const morePasswords = useMemo(
+    () => {
+      if (!isPasswordAction) return [];
+      return Array.from({ length: 10 }, () =>
+        generateCode(action, location, usersArray, groupsArray, foldersArray, suffix, prefix, kadry, password, passwordOptions)
+      );
+    },
+    [action, location, usersArray, groupsArray, foldersArray, prefix, suffix, kadry, password, passwordOptions],
+  );
+
+  function renderColoredPassword(pwd: string) {
+    return pwd.split("").map((char, i) => {
+      if (/[A-Z]/.test(char)) return <span key={i} className={styles.charUpper}>{char}</span>;
+      if (/[0-9]/.test(char)) return <span key={i} className={styles.charDigit}>{char}</span>;
+      return <span key={i}>{char}</span>;
+    });
+  }
 
   async function copyToClipboard() {
     if (!generatedCode || generatedCode.startsWith("Wpisz")) return;
 
     await navigator.clipboard.writeText(generatedCode);
-    setCopyButtonText("Copied");
+    setCopyButtonText("Skopiowano");
 
     setTimeout(() => {
-      setCopyButtonText("Copy");
+      setCopyButtonText("Kopiuj");
     }, 2000);
   }
 
@@ -103,7 +124,7 @@ export const Code = (props: CodeProps) => {
             {isPasswordAction && (
               <button onClick={() => setNonce((n) => n + 1)}>
                 <IoReload />
-                <span>Regenerate</span>
+                <span>Generuj</span>
               </button>
             )}
             <button onClick={copyToClipboard}>
@@ -113,10 +134,33 @@ export const Code = (props: CodeProps) => {
           </div>
         </header>
 
-        <pre className={styles.codeBlock}>
-          <code>{generatedCode || "Brak wygenerowanego kodu"}</code>
+        <pre className={clsx(styles.codeBlock, isPasswordAction && styles.codeBlockPassword)}>
+          <code>
+            {isPasswordAction && generatedCode
+              ? renderColoredPassword(generatedCode)
+              : generatedCode || "Brak wygenerowanego kodu"}
+          </code>
         </pre>
       </div>
+
+      {isPasswordAction && morePasswords.length > 0 && (
+        <div className={styles.historyContainer}>
+          <span className={styles.historyTitle}>Więcej haseł</span>
+          <div className={styles.historyItems}>
+            {morePasswords.map((pwd, i) => (
+              <div key={i} className={styles.historyItem}>
+                <code>{pwd}</code>
+                <button
+                  className={styles.historyItemButton}
+                  onClick={() => navigator.clipboard.writeText(pwd)}
+                >
+                  <IoCopyOutline />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
