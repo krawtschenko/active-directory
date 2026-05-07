@@ -28,15 +28,13 @@ export const Radio = <T extends string>(props: RadioProps<T>) => {
       {...rest}
     >
       {options.map(({ label, value }) => (
-        <div key={value} className={style.RadioGroupWrapper}>
+        <label key={value} className={style.RadioGroupWrapper} htmlFor={value}>
           <RadioGroup.Item className={style.RadioGroupItem} value={value} id={value}>
             <RadioGroup.Indicator className={style.RadioGroupIndicator} />
           </RadioGroup.Item>
 
-          <label className={style.Label} htmlFor={value}>
-            {label}
-          </label>
-        </div>
+          <span className={style.Label}>{label}</span>
+        </label>
       ))}
     </RadioGroup.Root>
   );
