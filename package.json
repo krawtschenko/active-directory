@@ -8,7 +8,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "start": "electron .",
-    "dist": "vite build && electron-builder --win"
+    "dist": "vite build && electron-builder --win",
+    "dist:clean": "npx rimraf dist release node_modules/.vite && npm run dist"
   },
   "build": {
     "appId": "my.ad.app",
