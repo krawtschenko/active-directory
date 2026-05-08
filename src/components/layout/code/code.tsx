@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./code.module.scss";
 import { IoCopyOutline, IoReload } from "react-icons/io5";
 import clsx from "clsx";
@@ -7,7 +7,16 @@ import type { FormState } from "../../../app/useFormState";
 
 type CodeProps = Pick<
   FormState,
-  "action" | "location" | "users" | "groups" | "folders" | "suffix" | "prefix" | "kadry" | "password" | "passwordOptions"
+  | "action"
+  | "location"
+  | "users"
+  | "groups"
+  | "folders"
+  | "suffix"
+  | "prefix"
+  | "kadry"
+  | "password"
+  | "passwordOptions"
 >;
 
 const parseList = (input: string) => input.split(/[\s,]+/).filter(Boolean);
@@ -27,15 +36,13 @@ export const Code = (props: CodeProps) => {
   } = props;
 
   const [copyButtonText, setCopyButtonText] = useState("Kopiuj");
-  const [nonce, setNonce] = useState(0);
   const isPasswordAction = action === "password";
 
-  // Перетворюємо рядки у масиви тут — Form зберігає сирий текст без обрізання
   const usersArray = useMemo(() => parseList(users), [users]);
   const groupsArray = useMemo(() => parseList(groups), [groups]);
   const foldersArray = useMemo(() => parseList(folders), [folders]);
 
-  const generatedCode = useMemo(
+  const getCode = useCallback(
     () =>
       generateCode(
         action,
@@ -55,29 +62,40 @@ export const Code = (props: CodeProps) => {
       usersArray,
       groupsArray,
       foldersArray,
-      prefix,
       suffix,
+      prefix,
       kadry,
       password,
       passwordOptions,
-      nonce,
     ],
   );
 
-  const morePasswords = useMemo(
-    () => {
-      if (!isPasswordAction) return [];
-      return Array.from({ length: 10 }, () =>
-        generateCode(action, location, usersArray, groupsArray, foldersArray, suffix, prefix, kadry, password, passwordOptions)
-      );
-    },
-    [action, location, usersArray, groupsArray, foldersArray, prefix, suffix, kadry, password, passwordOptions],
+  const [generatedCode, setGeneratedCode] = useState(getCode);
+  const [morePasswords, setMorePasswords] = useState<string[]>(() =>
+    isPasswordAction ? Array.from({ length: 10 }, getCode) : [],
   );
+
+  useEffect(() => {
+    setGeneratedCode(getCode());
+    setMorePasswords(
+      isPasswordAction ? Array.from({ length: 10 }, getCode) : [],
+    );
+  }, [getCode, isPasswordAction]);
 
   function renderColoredPassword(pwd: string) {
     return pwd.split("").map((char, i) => {
-      if (/[A-Z]/.test(char)) return <span key={i} className={styles.charUpper}>{char}</span>;
-      if (/[0-9]/.test(char)) return <span key={i} className={styles.charDigit}>{char}</span>;
+      if (/[A-Z]/.test(char))
+        return (
+          <span key={i} className={styles.charUpper}>
+            {char}
+          </span>
+        );
+      if (/[0-9]/.test(char))
+        return (
+          <span key={i} className={styles.charDigit}>
+            {char}
+          </span>
+        );
       return <span key={i}>{char}</span>;
     });
   }
@@ -107,7 +125,7 @@ export const Code = (props: CodeProps) => {
 
           <div className={styles.headerButtons}>
             {isPasswordAction && (
-              <button onClick={() => setNonce((n) => n + 1)}>
+              <button onClick={() => setGeneratedCode(getCode())}>
                 <IoReload />
                 <span>Generuj</span>
               </button>
@@ -119,7 +137,12 @@ export const Code = (props: CodeProps) => {
           </div>
         </header>
 
-        <pre className={clsx(styles.codeBlock, isPasswordAction && styles.codeBlockPassword)}>
+        <pre
+          className={clsx(
+            styles.codeBlock,
+            isPasswordAction && styles.codeBlockPassword,
+          )}
+        >
           <code>
             {isPasswordAction && generatedCode
               ? renderColoredPassword(generatedCode)
