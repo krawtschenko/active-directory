@@ -1,7 +1,11 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, dialog } = require("electron");
 const { autoUpdater } = require("electron-updater");
+const log = require("electron-log");
 const fs = require("fs");
 const path = require("path");
+
+autoUpdater.logger = log;
+autoUpdater.logger.transports.file.level = "info";
 
 const WINDOW_STATE_FILE = "window-state.json";
 const DEFAULT_WINDOW_SIZE = {
@@ -66,6 +70,17 @@ function createWindow() {
   mainWindow.on("move", () => saveWindowState(mainWindow));
   mainWindow.on("close", () => saveWindowState(mainWindow));
 }
+
+autoUpdater.on("update-downloaded", () => {
+  dialog.showMessageBox({
+    type: "info",
+    title: "Оновлення готове",
+    message: "Нова версія завантажена. Перезапустити зараз?",
+    buttons: ["Так", "Пізніше"],
+  }).then(({ response }) => {
+    if (response === 0) autoUpdater.quitAndInstall();
+  });
+});
 
 app.whenReady().then(() => {
   createWindow();
