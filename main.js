@@ -74,11 +74,11 @@ function createWindow() {
 autoUpdater.on("update-downloaded", () => {
   dialog.showMessageBox({
     type: "info",
-    title: "Оновлення готове",
-    message: "Нова версія завантажена. Перезапустити зараз?",
-    buttons: ["Так", "Пізніше"],
+    title: "Aktualizacja gotowa",
+    message: "Nowa wersja została pobrana. Uruchomić ponownie teraz?",
+    buttons: ["Tak", "Później"],
   }).then(({ response }) => {
-    if (response === 0) autoUpdater.quitAndInstall();
+    if (response === 0) autoUpdater.quitAndInstall(true, true);
   });
 });
 
