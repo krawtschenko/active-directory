@@ -148,6 +148,15 @@ try {
         }
     }
 
+    $skanyPath = "\\\\192.168.242.30\\Skany\\${samAccountName}"
+    try {
+        New-Item -Path $skanyPath -ItemType Directory -Force -ErrorAction Stop | Out-Null
+        icacls $skanyPath /grant ("SZWAK\\${samAccountName}:(OI)(CI)(M)") | Out-Null
+        Write-Host "  [OK] Skany folder created: $skanyPath" -ForegroundColor DarkGreen
+    } catch {
+        Write-Host "  [WARN] Could not create Skany folder: $_" -ForegroundColor Yellow
+    }
+
     Write-Host ""
     Write-Host "  [OK] User created successfully." -ForegroundColor Green
     Write-Host ""
