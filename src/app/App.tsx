@@ -9,76 +9,76 @@ import type { Item } from "../components/radio/radio.tsx";
 
 // Опції визначені поза компонентом — стабільне посилання між рендерами
 const options: Item<Action>[] = [
-	{ label: "Tworzenie folderu", value: "createFolder" },
-	{ label: "Tworzenie grupy", value: "create" },
-	{ label: "Dodanie do grupy", value: "add" },
-	{ label: "Nadanie Dostępu (:RX)", value: "rx" },
-	{ label: "Nadanie Dostępu (:M)", value: "m" },
-	{ label: "SQL", value: "sql" },
-	{ label: "Generator haseł", value: "password" },
+  { label: "Tworzenie użytkownika", value: "createUser" },
+  { label: "Tworzenie folderu", value: "createFolder" },
+  { label: "Tworzenie grupy", value: "create" },
+  { label: "Dodanie do grupy", value: "add" },
+  { label: "Nadanie Dostępu (:RX)", value: "rx" },
+  { label: "Nadanie Dostępu (:M)", value: "m" },
+  { label: "SQL", value: "sql" },
+  { label: "Generator haseł", value: "password" },
 ];
 
 type Theme = "light" | "dark";
 
 const getSystemTheme = (): Theme => {
-	if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-		return "dark";
-	}
+  if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    return "dark";
+  }
 
-	return "light";
+  return "light";
 };
 
 export const App = () => {
-	// setAction відокремлюємо, щоб не передавати його у Form (Form не змінює дію)
-	const { setAction, setLocation, setUsers, setGroups, setFolders, setSuffix, setPrefix, setKadry, setPassword, setPasswordOptions, ...codeData } = useFormState();
-	const formState = { ...codeData, setLocation, setUsers, setGroups, setFolders, setSuffix, setPrefix, setKadry, setPassword, setPasswordOptions };
-	const [theme, setTheme] = useState<Theme>(getSystemTheme);
+  // setAction відокремлюємо, щоб не передавати його у Form (Form не змінює дію)
+  const { setAction, ...codeData } = useFormState();
+  const [theme, setTheme] = useState<Theme>(getSystemTheme);
 
-	useEffect(() => {
-		const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-		const handleSystemThemeChange = (event: MediaQueryListEvent) => {
-			setTheme(event.matches ? "dark" : "light");
-		};
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleSystemThemeChange = (event: MediaQueryListEvent) => {
+      setTheme(event.matches ? "dark" : "light");
+    };
 
-		mediaQuery.addEventListener("change", handleSystemThemeChange);
+    mediaQuery.addEventListener("change", handleSystemThemeChange);
 
-		return () => {
-			mediaQuery.removeEventListener("change", handleSystemThemeChange);
-		};
-	}, []);
+    return () => {
+      mediaQuery.removeEventListener("change", handleSystemThemeChange);
+    };
+  }, []);
 
-	useEffect(() => {
-		document.body.dataset.theme = theme;
-	}, [theme]);
+  useEffect(() => {
+    document.body.dataset.theme = theme;
+  }, [theme]);
 
-	return (
-		<div className={styles.app}>
-			<header className={styles.header}>
-				<div>
-					<h1>Active Directory Helper</h1>
-					<p>Generator komend administracyjnych</p>
-				</div>
-			</header>
+  return (
+    <div className={styles.app}>
+      <header className={styles.header}>
+        <div>
+          <h1>Active Directory Helper</h1>
+          <p>Generator komend administracyjnych</p>
+        </div>
+      </header>
 
-			<div className={styles.block1}>
-				<h2 className={styles.panelTitle}>Akcja</h2>
-				<Radio
-					className={styles.radio}
-					options={options}
-					defaultValue={formState.action}
-					onValueChange={setAction}
-				/>
-			</div>
+      <div className={styles.block1}>
+        <h2 className={styles.panelTitle}>Akcja</h2>
+        <Radio
+          className={styles.radio}
+          options={options}
+          defaultValue={codeData.action}
+          onValueChange={setAction}
+        />
+      </div>
 
-			<div className={styles.block2}>
-				<h2 className={styles.panelTitle}>Parametry</h2>
-				<Form state={formState} />
-			</div>
+      <div className={styles.block2}>
+        <h2 className={styles.panelTitle}>Parametry</h2>
+        <Form state={codeData} />
+      </div>
 
-			<div className={styles.block3}>
-				<h2 className={styles.panelTitle}>Wynik</h2>
-				<Code {...codeData} />
-			</div>
-		</div>
-	);
+      <div className={styles.block3}>
+        <h2 className={styles.panelTitle}>Wynik</h2>
+        <Code {...codeData} />
+      </div>
+    </div>
+  );
 };

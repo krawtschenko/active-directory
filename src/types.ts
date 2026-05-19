@@ -1,4 +1,12 @@
-export type Action = "createFolder" | "create" | "add" | "rx" | "m" | "sql" | "password";
+export type Action =
+  | "createUser"
+  | "createFolder"
+  | "create"
+  | "add"
+  | "rx"
+  | "m"
+  | "sql"
+  | "password";
 
 export type PasswordOptions = {
   uppercase: boolean;

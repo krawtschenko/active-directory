@@ -8,4 +8,5 @@ export const VALIDATION = {
   ENTER_GROUP: "Wpisz nazwę grupy, aby wygenerować kod",
   ENTER_USER_AND_GROUP: "Wpisz nazwę użytkownika i grupy, aby wygenerować kod",
   ENTER_USER_AND_BASE: "Wpisz nazwę użytkownika i bazy, aby wygenerować kod",
+  ENTER_USER_DATA: "Wpisz imię i nazwisko, aby wygenerować kod",
 } as const;

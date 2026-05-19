@@ -1,5 +1,11 @@
 import type { Action, PasswordOptions } from "../types";
-import { SERVER_SHARE, SQL_DOMAIN, AD_OU_GROUPS, AD_OU_KADRY, VALIDATION } from "./constants";
+import {
+  SERVER_SHARE,
+  SQL_DOMAIN,
+  AD_OU_GROUPS,
+  AD_OU_KADRY,
+  VALIDATION,
+} from "./constants";
 
 function assertNever(value: never): never {
   throw new Error(`Unsupported action: ${String(value)}`);
@@ -9,12 +15,24 @@ function sanitize(s: string): string {
   return s.replace(/\\/g, "_");
 }
 
-function buildGroupName(name: string, prefix?: string, suffix?: string, kadry = false): string {
+function buildGroupName(
+  name: string,
+  prefix?: string,
+  suffix?: string,
+  kadry = false,
+): string {
   const base = kadry ? "GS_Firmy_Kadry_i_Place" : "GS_Firmy";
-  return [base, prefix, name, suffix].filter(Boolean).map(sanitize).join("_");
+  return [base, prefix, name, suffix]
+    .filter((s): s is string => Boolean(s))
+    .map(sanitize)
+    .join("_");
 }
 
-function buildIcaclsCommand(path: string, groupName: string, permissions: string): string {
+function buildIcaclsCommand(
+  path: string,
+  groupName: string,
+  permissions: string,
+): string {
   return `icacls "${SERVER_SHARE}\\${path}" /grant "${groupName}:${permissions}"`;
 }
 
@@ -25,6 +43,148 @@ function buildPaths(path: string): string[] {
     result.push(parts.slice(0, i).join("\\"));
   }
   return result;
+}
+
+function createUser(name: string, surname: string, userPassword: string) {
+  if (!name || !surname) return VALIDATION.ENTER_USER_DATA;
+
+  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+  name = capitalize(name);
+  surname = capitalize(surname);
+
+  const fullName = `${name} ${surname}`;
+
+  function removeDiacritics(str: string): string {
+    const map: Record<string, string> = {
+      ą: "a",
+      ć: "c",
+      ę: "e",
+      ł: "l",
+      ń: "n",
+      ó: "o",
+      ś: "s",
+      ź: "z",
+      ż: "z",
+      Ą: "A",
+      Ć: "C",
+      Ę: "E",
+      Ł: "L",
+      Ń: "N",
+      Ó: "O",
+      Ś: "S",
+      Ź: "Z",
+      Ż: "Z",
+    };
+    return str.replace(/[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/g, (ch) => map[ch] ?? ch);
+  }
+
+  const samAccountName = `${removeDiacritics(name).toLowerCase()}.${removeDiacritics(surname).toLowerCase()}`;
+
+  const psScript = `
+Import-Module ActiveDirectory
+
+# ── Step 1: Choose container ─────────────────────────────────
+Write-Host ""
+Write-Host "  Select container:" -ForegroundColor Cyan
+Write-Host "  [1] Spicesolutions" -ForegroundColor Gray
+Write-Host "  [2] O365 Sync" -ForegroundColor Gray
+Write-Host ""
+$topKey    = [Console]::ReadKey($true)
+$topChoice = $topKey.KeyChar
+Write-Host "  > $topChoice"
+
+if ($topChoice -eq "1") {
+    $targetOU          = "OU=Spicesolutions,OU=Uzytkownicy,OU=Szwak,DC=szwak,DC=local"
+    $containerLabel    = "Spicesolutions"
+    $userPrincipalName = "${samAccountName}@szwak.local"
+    $emailAddress      = "${samAccountName}@spicesolutions.pl"
+} else {
+    $o365Base          = "OU=O365 Sync,OU=Uzytkownicy,OU=Szwak,DC=szwak,DC=local"
+    $userPrincipalName = "${samAccountName}@epta.com.pl"
+    $emailAddress      = "${samAccountName}@epta.com.pl"
+
+    try {
+        $subOUs = Get-ADOrganizationalUnit \`
+            -Filter * \`
+            -SearchBase $o365Base \`
+            -SearchScope OneLevel \`
+            | Select-Object -ExpandProperty Name
+    } catch {
+        Write-Host "  [ERROR] Could not retrieve sub-containers from AD." -ForegroundColor Red
+        Write-Host "  $_" -ForegroundColor DarkRed
+        exit 1
+    }
+
+    if ($subOUs.Count -eq 0) {
+        Write-Host "  [WARNING] No sub-containers found, using 'O365 Sync' directly." -ForegroundColor Yellow
+        $targetOU       = $o365Base
+        $containerLabel = "O365 Sync"
+    } else {
+        Write-Host ""
+        Write-Host "  Select sub-container:" -ForegroundColor Cyan
+        for ($i = 0; $i -lt $subOUs.Count; $i++) {
+            Write-Host "  [$($i + 1)] $($subOUs[$i])" -ForegroundColor Gray
+        }
+        Write-Host ""
+        $subKey         = [Console]::ReadKey($true)
+        Write-Host "  > $($subKey.KeyChar)"
+        $subIndex       = [int]::Parse($subKey.KeyChar) - 1
+        $chosenSub      = $subOUs[$subIndex]
+        $targetOU       = "OU=$chosenSub,$o365Base"
+        $containerLabel = "O365 Sync \\ $chosenSub"
+    }
+}
+
+# ── Step 2: Summary & confirm ────────────────────────────────
+Write-Host ""
+Write-Host "  Full name   : ${fullName}" -ForegroundColor White
+Write-Host "  Username    : ${samAccountName}" -ForegroundColor White
+Write-Host "  UPN         : $userPrincipalName" -ForegroundColor White
+Write-Host "  Email       : $emailAddress" -ForegroundColor White
+Write-Host "  Password    : ${userPassword}" -ForegroundColor White
+Write-Host "  Container   : $containerLabel" -ForegroundColor White
+Write-Host ""
+Write-Host "  Proceed? [Y/n]  (Enter = Yes)" -ForegroundColor Yellow
+$confirmKey = [Console]::ReadKey($true)
+Write-Host ""
+
+if ($confirmKey.Key -ne [ConsoleKey]::Enter -and $confirmKey.KeyChar -notmatch '^[Yy]$') {
+    Write-Host "  Aborted." -ForegroundColor Red
+    exit 0
+}
+
+# ── Step 3: Create the AD user ───────────────────────────────
+try {
+    $securePass = ConvertTo-SecureString "${userPassword}" -AsPlainText -Force
+
+    New-ADUser \`
+        -Name              "${fullName}" \`
+        -GivenName         "${name}" \`
+        -Surname           "${surname}" \`
+        -SamAccountName    "${samAccountName}" \`
+        -UserPrincipalName $userPrincipalName \`
+        -EmailAddress      $emailAddress \`
+        -AccountPassword   $securePass \`
+        -Path              $targetOU \`
+        -Enabled           $true \`
+        -ChangePasswordAtLogon $false
+
+    Write-Host ""
+    Write-Host "  [OK] User created successfully." -ForegroundColor Green
+    Write-Host ""
+    Write-Host "  Full name   : " -NoNewline -ForegroundColor DarkGray; Write-Host "${fullName}" -ForegroundColor Cyan
+    Write-Host "  Login       : " -NoNewline -ForegroundColor DarkGray; Write-Host "${samAccountName}" -ForegroundColor Yellow
+    Write-Host "  Email       : " -NoNewline -ForegroundColor DarkGray; Write-Host "$emailAddress" -ForegroundColor Magenta
+    Write-Host "  Password    : " -NoNewline -ForegroundColor DarkGray; Write-Host "${userPassword}" -ForegroundColor Red
+    Write-Host "  Container   : " -NoNewline -ForegroundColor DarkGray; Write-Host "$containerLabel" -ForegroundColor Green
+    Write-Host ""
+} catch {
+    Write-Host "  [ERROR] Failed to create user." -ForegroundColor Red
+    Write-Host "  $_" -ForegroundColor DarkRed
+}
+`.trim();
+
+  return psScript;
 }
 
 function createFolder(folders: string[], location?: string) {
@@ -71,8 +231,11 @@ function createGroup(
   if (groups.length === 0) return VALIDATION.ENTER_GROUP;
 
   const ouPath = kadry ? AD_OU_KADRY : AD_OU_GROUPS;
-  const groupNames = groups.map((g) => `"${buildGroupName(g, prefix, suffix, kadry)}"`).join(", ");
-  const userNames = users.length > 0 ? users.map((u) => `"${u}"`).join(", ") : "";
+  const groupNames = groups
+    .map((g) => `"${buildGroupName(g, prefix, suffix, kadry)}"`)
+    .join(", ");
+  const userNames =
+    users.length > 0 ? users.map((u) => `"${u}"`).join(", ") : "";
 
   return `$OUPath = "${ouPath}"
 $Groups = @(${groupNames})
@@ -109,10 +272,13 @@ function addUserToGroup(
   prefix: string,
   suffix: string,
 ) {
-  if (users.length === 0 || groups.length === 0) return VALIDATION.ENTER_USER_AND_GROUP;
+  if (users.length === 0 || groups.length === 0)
+    return VALIDATION.ENTER_USER_AND_GROUP;
 
   const userNames = users.map((u) => `"${u}"`).join(", ");
-  const groupNames = groups.map((g) => `"${buildGroupName(g, prefix, suffix)}"`).join(", ");
+  const groupNames = groups
+    .map((g) => `"${buildGroupName(g, prefix, suffix)}"`)
+    .join(", ");
 
   return `$Users = @(${userNames})
 $Groups = @(${groupNames})
@@ -142,11 +308,15 @@ function grantAccessRX(folders: string[], groups: string[], suffix: string) {
   if (folders.length === 0) return VALIDATION.ENTER_FOLDER;
 
   const commands = new Set<string>();
-  const suffixes = suffix.split(",").map((s) => s.trim()).filter(Boolean);
+  const suffixes = suffix
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   const getGroupNames = (currentPath: string): string[] => {
     if (groups.length > 0) return groups.map((g) => buildGroupName(g));
-    if (suffixes.length > 0) return suffixes.map((suf) => buildGroupName(currentPath, undefined, suf));
+    if (suffixes.length > 0)
+      return suffixes.map((suf) => buildGroupName(currentPath, undefined, suf));
     return [buildGroupName(currentPath)];
   };
 
@@ -164,36 +334,48 @@ function grantAccessRX(folders: string[], groups: string[], suffix: string) {
 function grantAccessM(folders: string[], suffix: string) {
   if (folders.length === 0) return VALIDATION.ENTER_FOLDER;
 
-  return folders
-    .map((folder) => {
-      const path = suffix ? `${folder}\\${suffix}` : folder;
-      return buildIcaclsCommand(path, buildGroupName(path), "(OI)(CI)(M)");
-    })
-    .join("\n") + "\n";
+  return (
+    folders
+      .map((folder) => {
+        const path = suffix ? `${folder}\\${suffix}` : folder;
+        return buildIcaclsCommand(path, buildGroupName(path), "(OI)(CI)(M)");
+      })
+      .join("\n") + "\n"
+  );
 }
 
 function grantAccessSQL(users: string[], bases: string[]) {
-  if (users.length === 0 || bases.length === 0) return VALIDATION.ENTER_USER_AND_BASE;
+  if (users.length === 0 || bases.length === 0)
+    return VALIDATION.ENTER_USER_AND_BASE;
 
   const escape = (value: string) => value.replace(/]/g, "]]");
 
-  return users
-    .flatMap((u) =>
-      bases.map(
-        (b) =>
-          `USE [${escape(b)}]\nCREATE USER [${SQL_DOMAIN}\\${escape(u)}] FOR LOGIN [${SQL_DOMAIN}\\${escape(u)}]\nALTER ROLE [db_owner] ADD MEMBER [${SQL_DOMAIN}\\${escape(u)}]`,
-      ),
-    )
-    .join("\n\n") + "\n\n";
+  return (
+    users
+      .flatMap((u) =>
+        bases.map(
+          (b) =>
+            `USE [${escape(b)}]\nCREATE USER [${SQL_DOMAIN}\\${escape(u)}] FOR LOGIN [${SQL_DOMAIN}\\${escape(u)}]\nALTER ROLE [db_owner] ADD MEMBER [${SQL_DOMAIN}\\${escape(u)}]`,
+        ),
+      )
+      .join("\n\n") + "\n\n"
+  );
 }
 
 function generatePassword(length: number, options: PasswordOptions): string {
   const ambiguous = "Il";
   const filterAmbiguous = (s: string) =>
-    options.noAmbiguous ? s.split("").filter((c) => !ambiguous.includes(c)).join("") : s;
+    options.noAmbiguous
+      ? s
+          .split("")
+          .filter((c) => !ambiguous.includes(c))
+          .join("")
+      : s;
 
   const lowerSet = filterAmbiguous("abcdefghijklmnopqrstuvwxyz");
-  const upperSet = options.uppercase ? filterAmbiguous("ABCDEFGHIJKLMNOPQRSTUVWXYZ") : "";
+  const upperSet = options.uppercase
+    ? filterAmbiguous("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    : "";
   const digitsSet = options.numbers ? "0123456789" : "";
   const specialSet = options.symbols ? "!@#$%^&*()-_=+[]{}|;:,.<>?" : "";
 
@@ -203,16 +385,22 @@ function generatePassword(length: number, options: PasswordOptions): string {
   const safeLength = Math.max(8, Math.min(128, length));
 
   try {
-    const requiredSets = [lowerSet, upperSet, digitsSet, specialSet].filter(Boolean);
+    const requiredSets = [lowerSet, upperSet, digitsSet, specialSet].filter(
+      Boolean,
+    );
     const requiredBytes = new Uint32Array(requiredSets.length);
     crypto.getRandomValues(requiredBytes);
-    const required = requiredSets.map((set, i) => set[requiredBytes[i] % set.length]);
+    const required = requiredSets.map(
+      (set, i) => set[requiredBytes[i] % set.length],
+    );
 
     const bytes = new Uint32Array(safeLength);
     crypto.getRandomValues(bytes);
     const password = Array.from(bytes, (x) => charset[x % charset.length]);
 
-    required.forEach((char, i) => { password[i] = char; });
+    required.forEach((char, i) => {
+      password[i] = char;
+    });
 
     const shuffleBytes = new Uint32Array(safeLength);
     crypto.getRandomValues(shuffleBytes);
@@ -228,6 +416,9 @@ function generatePassword(length: number, options: PasswordOptions): string {
 }
 
 export function generateCode(
+  name: string,
+  surname: string,
+  userPassword: string,
   action: Action,
   location: string,
   users: string[],
@@ -240,6 +431,10 @@ export function generateCode(
   passwordOptions: PasswordOptions,
 ) {
   switch (action) {
+    case "createUser": {
+      const pwd = userPassword || generatePassword(14, passwordOptions);
+      return createUser(name, surname, pwd);
+    }
     case "createFolder":
       return createFolder(folders, location);
     case "create":

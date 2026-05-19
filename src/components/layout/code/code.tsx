@@ -8,6 +8,9 @@ import type { FormState } from "../../../app/useFormState";
 type CodeProps = Pick<
   FormState,
   | "action"
+  | "name"
+  | "surname"
+  | "userPassword"
   | "location"
   | "users"
   | "groups"
@@ -24,6 +27,9 @@ const parseList = (input: string) => input.split(/[\s,]+/).filter(Boolean);
 export const Code = (props: CodeProps) => {
   const {
     action,
+    name,
+    surname,
+    userPassword,
     location,
     users,
     groups,
@@ -45,6 +51,9 @@ export const Code = (props: CodeProps) => {
   const getCode = useCallback(
     () =>
       generateCode(
+        name,
+        surname,
+        userPassword,
         action,
         location,
         usersArray,
@@ -57,6 +66,9 @@ export const Code = (props: CodeProps) => {
         passwordOptions,
       ),
     [
+      name,
+      surname,
+      userPassword,
       action,
       location,
       usersArray,
