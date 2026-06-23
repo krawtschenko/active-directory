@@ -160,10 +160,10 @@ try {
     Write-Host ""
     Write-Host "  [OK] User created successfully." -ForegroundColor Green
     Write-Host ""
-    Write-Host "  Full name   : " -NoNewline -ForegroundColor DarkGray; Write-Host "${fullName}" -ForegroundColor Cyan
-    Write-Host "  Login       : " -NoNewline -ForegroundColor DarkGray; Write-Host "${samAccountName}" -ForegroundColor Yellow
-    Write-Host "  Email       : " -NoNewline -ForegroundColor DarkGray; Write-Host "$emailAddress" -ForegroundColor Magenta
-    Write-Host "  Password    : " -NoNewline -ForegroundColor DarkGray; Write-Host "${userPassword}" -ForegroundColor Red
+    Write-Host "  Full name   : " -NoNewline -ForegroundColor DarkGray; Write-Host "${fullName}" -ForegroundColor Green
+    Write-Host "  Login       : " -NoNewline -ForegroundColor DarkGray; Write-Host "${samAccountName}" -ForegroundColor Green
+    Write-Host "  Email       : " -NoNewline -ForegroundColor DarkGray; Write-Host "$emailAddress" -ForegroundColor Green
+    Write-Host "  Password    : " -NoNewline -ForegroundColor DarkGray; Write-Host "${userPassword}" -ForegroundColor Green
     Write-Host "  Container   : " -NoNewline -ForegroundColor DarkGray; Write-Host "$containerLabel" -ForegroundColor Green
     Write-Host ""
 } catch {
